@@ -1,4 +1,5 @@
 import agentBase
+import numpy as np
 import heapq
 import math
 
@@ -11,8 +12,8 @@ def push_node(curr_list, node):
 """
 pop_node from mapf project
 """
-def pop_node(open_list):
-    _, _, _, curr = heapq.heappop(open_list)
+def pop_node(curr_list):
+    _, _, _, curr = heapq.heappop(curr_list)
     return curr
 
 """
@@ -56,16 +57,17 @@ def a_star_search(self, h):
     self.current    - agents current position
     """
 
+    # initialization
     open_list = []
+    closed_list = dict()
     root = {'loc': self.start, 'g_val': 0, 'h_val': h(self.start, self.goal), 'parent': None}
     goal_state = self.goal
     push_node(open_list, root)
-    # closed_list = dict()
     # closed_list[(root['loc'])] = root
-    print("length:", open_list)
 
     while len(open_list) > 0:
         node = pop_node(open_list)
+        self.current = node['loc']
         print("curr loc:", node['loc'])
 
         # path to goal state has been found
@@ -73,13 +75,36 @@ def a_star_search(self, h):
             print("PATH FOUND:")
             return get_path(node)
 
+        # take movement option indices in agentBase.nextStep()...
+        # map out viable indices to locations in map
         move_options = self.nextStep()
-        print("loc", move_options)
-        # for move in move_options:
-        #     child = {'loc': move,
-        #             'g_val': node['g_val'] + 1,
-        #             'h_val': h(move.current, goal_state),
-        #             'parent': node}
+        move_list = []
+        for i in range(len(move_options)):
+            if move_options[i] == 1:
+                move_list.append((node['loc'][0], node['loc'][1]+1))
+            if move_options[i] == 2:
+                print((node['loc'][0]+1, node['loc'][1]))
+                move_list.append((node['loc'][0]+1, node['loc'][1]))
+                print(move_list[0])
+            if move_options[i] == 3:
+                move_list.append((node['loc'][0], node['loc'][1]-1))
+            #### TODO: when (x-1) issue in agentBase.nextStep() is fixed
+            if move_options[i] == 4: 
+                move_list.append((node['loc'][0]-1, node['loc'][1]))
+        # end of for in loop
+        numpy_moves = np.array(move_list) # convert list to numpy array
+        
+        # for valid locations, create movement child
+        for move in numpy_moves:
+            child = {'loc': move,
+                    'g_val': node['g_val'] + 1,
+                    'h_val': h(move, goal_state),
+                    'parent': node}
+            push_node(open_list, child)
+        # end of for in loop
+
+    # end of while
+    return None  # Failed to find solutions
 
 
 
