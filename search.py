@@ -26,6 +26,7 @@ def get_path(node):
         path.append(curr['loc'])
         curr = curr['parent']
     path.reverse()
+    print("LENGTH:", len(path))
     return path
 
 
@@ -73,7 +74,13 @@ def a_star_search(self, h):
     push_node(open_list, root)
     closed_list[(root['loc'])] = root
 
+    nodes_expanded = 0
+    max_size_of_open = len(open_list)
     while len(open_list) > 0:
+        nodes_expanded += 1 # time complexity
+        if len(open_list) > max_size_of_open: # space complexity
+            max_size_of_open = len(open_list)
+
         node = pop_node(open_list)
         current_pos = node['loc']
         self.current[0] = current_pos[0]
@@ -82,6 +89,8 @@ def a_star_search(self, h):
         # path to goal state has been found
         if current_pos == goal_pos:
             print("SOLUTION FOUND:")
+            print("NODES EXPANDED:", nodes_expanded)
+            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
             return get_path(node)
 
         # take movement option indices in agentBase.nextStep()...
@@ -106,7 +115,7 @@ def a_star_search(self, h):
                     'g_val': node['g_val'] + 1,
                     'h_val': h(move, goal_pos),
                     'parent': node}
-            if not (child['loc']) in closed_list: # 
+            if not (child['loc']) in closed_list: # pruning
                 closed_list[(child['loc'])] = child
                 push_node(open_list, child)
         # end of for in loop
