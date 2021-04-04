@@ -75,16 +75,16 @@ class Agent:
         x = self.current[0]
         y = self.current[1]
         
-        if (self.map[x][(y + 1)] == "."):
+        if (self.map[x][(y + 1)] in "."):
             np.append(possibleDirections,1)
             
-        if (self.map[(x + 1)][y] == "."):
+        if (self.map[(x + 1)][y] in "."):
             np.append(possibleDirections,2)
                       
-        if (self.map[x][(y - 1)] == "."):
+        if (self.map[x][(y - 1)] in "."):
             np.append(possibleDirections,3)
-                      
-        if (self.map[(x - 0)][y] == '.'):
+                     
+        if (self.map[(x)][y] in "."):
             np.append(possibleDirections,4)
         
         #if len(possibleDirections) == 0:
