@@ -89,12 +89,12 @@ class Agent:
         
         #if len(possibleDirections) == 0:
         #    possibleDirections.append(0)
-        print("POSSIBLE DIRECTIONS")
+        # print("POSSIBLE DIRECTIONS")
         # print(str(self.map[self.current[0]][(self.current[1] + 1)]) + "---" + 
         #       str(self.map[(self.current[0] + 1)][self.current[1]]) + "---" + 
         #       str(self.map[self.current[0]][(self.current[1] - 1)]) + "---" + 
         #       str(self.map[(self.current[0])][self.current[1]]) + "---")
-        print(possibleDirections)
+        # print(possibleDirections)
         return possibleDirections
 
 

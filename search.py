@@ -74,7 +74,6 @@ def a_star_search(self, h):
         current_pos = node['loc']
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
-        print("curr loc:", node['loc'])
 
         # path to goal state has been found
         if current_pos == goal_pos:
