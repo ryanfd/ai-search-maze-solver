@@ -32,12 +32,12 @@ def get_path(node):
 """
 Straight Line Heuristic
 
-@autho: Ryan Donnelly
+@author: Ryan Donnelly
 """
 def straight_line_heursitic(current_pos, goal_pos):
     """
     c^2 = a^2 + b^2
-    c = sqrt((x1-x2)^2 + (y1-y2)^2)
+    c   = sqrt((x1-x2)^2 + (y1-y2)^2)
     """
     return math.sqrt((goal_pos[0] - current_pos[0])**2 + (goal_pos[1] - current_pos[1])**2)
 
@@ -50,29 +50,35 @@ Pseudocode: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
 
 def a_star_search(self, h):
     """
-    h - chosen heuristic
+    h               - chosen heuristic
     self.map        - maze to solve
     self.start      - agent starting goal
     self.goal       - agent end goal
     self.current    - agents current position
     """
 
+    # convert from numpy to regulat list, heappush has problems with numpy
+    start_pos = (self.start[0], self.start[1])
+    goal_pos = (self.goal[0], self.goal[1])
+    current_pos = start_pos
+
     # initialization
     open_list = []
     closed_list = dict()
-    root = {'loc': self.start, 'g_val': 0, 'h_val': h(self.start, self.goal), 'parent': None}
-    goal_state = self.goal
+    root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}
     push_node(open_list, root)
-    # closed_list[(root['loc'])] = root
+    closed_list[(root['loc'])] = root
 
     while len(open_list) > 0:
         node = pop_node(open_list)
-        self.current = node['loc']
+        current_pos = node['loc']
+        self.current[0] = current_pos[0]
+        self.current[1] = current_pos[1]
         print("curr loc:", node['loc'])
 
         # path to goal state has been found
-        if node['loc'][0] == self.goal[0] and node['loc'][1] == self.goal[1]:
-            print("PATH FOUND:")
+        if current_pos == goal_pos:
+            print("SOLUTION FOUND:")
             return get_path(node)
 
         # take movement option indices in agentBase.nextStep()...
@@ -83,24 +89,23 @@ def a_star_search(self, h):
             if move_options[i] == 1:
                 move_list.append((node['loc'][0], node['loc'][1]+1))
             if move_options[i] == 2:
-                print((node['loc'][0]+1, node['loc'][1]))
                 move_list.append((node['loc'][0]+1, node['loc'][1]))
-                print(move_list[0])
             if move_options[i] == 3:
                 move_list.append((node['loc'][0], node['loc'][1]-1))
             #### TODO: when (x-1) issue in agentBase.nextStep() is fixed
             if move_options[i] == 4: 
                 move_list.append((node['loc'][0]-1, node['loc'][1]))
         # end of for in loop
-        numpy_moves = np.array(move_list) # convert list to numpy array
         
         # for valid locations, create movement child
-        for move in numpy_moves:
+        for move in move_list:
             child = {'loc': move,
                     'g_val': node['g_val'] + 1,
-                    'h_val': h(move, goal_state),
+                    'h_val': h(move, goal_pos),
                     'parent': node}
-            push_node(open_list, child)
+            if not (child['loc']) in closed_list: # 
+                closed_list[(child['loc'])] = child
+                push_node(open_list, child)
         # end of for in loop
 
     # end of while
@@ -114,8 +119,7 @@ def main():
     
     agent = agentBase.Agent(my_map)
 
-    print("Euclidian Distance:", straight_line_heursitic([0,0], [10,10]))
-    a_star_search(agent, straight_line_heursitic)
+    print(a_star_search(agent, straight_line_heursitic))
 
 
 
