@@ -63,6 +63,10 @@ def a_star_search(self, h):
     current_pos = start_pos
 
     # initialization
+    print("\nCoordinate Configuration: (Y, X)")
+    print("Start State:", start_pos)
+    print("Goal State:", goal_pos, "\n")
+
     open_list = []
     closed_list = dict()
     root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}

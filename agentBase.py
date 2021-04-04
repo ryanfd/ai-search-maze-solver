@@ -39,8 +39,8 @@ class Map:
                 elif self.map[row][coll] == '1':
                     self.goal = np.array([row,coll])
                     
-        print(self.start)
-        print(self.goal)
+        # print(self.start)
+        # print(self.goal)
 
 class Agent:
     def __init__(self, my_map):
