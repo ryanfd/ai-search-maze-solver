@@ -39,8 +39,8 @@ class Map:
                 elif self.map[row][coll] == '1':
                     self.goal = np.array([row,coll])
                     
-        print(self.start)
-        print(self.goal)
+        # print(self.start)
+        # print(self.goal)
 
 class Agent:
     def __init__(self, my_map):
@@ -89,6 +89,7 @@ class Agent:
         y = self.current[0]
         x = self.current[1]
         
+
         if (self.map[y][(x + 1)] == '.' or self.map[y][(x + 1)] == '1'):
             possibleDirections = np.append(possibleDirections,3)
             
@@ -105,6 +106,23 @@ class Agent:
         #if len(possibleDirections) == 0:
         #    possibleDirections.append(0)
         print("POSSIBLE DIRECTIONS" + str(possibleDirections))
+        """
+        if (self.map[x][(y + 1)] == '.' or self.map[x][(y + 1)] == '1'):
+            possibleDirections = np.append(possibleDirections,1)
+            
+        if x < 18 and (self.map[(x + 1)][y] == '.' or self.map[(x + 1)][y] == '1'):
+            possibleDirections = np.append(possibleDirections,2)
+                      
+        if (self.map[x][(y - 1)] == '.' or self.map[x][(y - 1)] == '1'):
+            possibleDirections = np.append(possibleDirections,3)
+                      
+        if x > 2 and (self.map[(x - 1)][y] == '.' or self.map[(x - 1)][y] == '1'):
+            possibleDirections = np.append(possibleDirections,4)
+        
+        #if len(possibleDirections) == 0:
+        #    possibleDirections.append(0)
+        # print("POSSIBLE DIRECTIONS")
+        """
         # print(str(self.map[self.current[0]][(self.current[1] + 1)]) + "---" + 
         #       str(self.map[(self.current[0] + 1)][self.current[1]]) + "---" + 
         #       str(self.map[self.current[0]][(self.current[1] - 1)]) + "---" + 
