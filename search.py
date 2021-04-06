@@ -109,17 +109,6 @@ def a_star_search(self, h):
             if move_options[i] == 4: 
                 move_list.append((node['loc'][0]-1, node['loc'][1]))
                 
-            """
-            if move_options[i] == 1:
-                move_list.append((node['loc'][0], node['loc'][1]+1))
-            if move_options[i] == 2:
-                move_list.append((node['loc'][0]+1, node['loc'][1]))
-            if move_options[i] == 3:
-                move_list.append((node['loc'][0], node['loc'][1]-1))
-            #### TODO: when (x-1) issue in agentBase.nextStep() is fixed
-            if move_options[i] == 4: 
-                move_list.append((node['loc'][0]-1, node['loc'][1]))
-            """
         # end of for in loop
 
         # for valid locations, create movement child

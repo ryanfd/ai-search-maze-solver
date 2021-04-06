@@ -14,6 +14,8 @@ Created on Sat Mar 27 18:00:06 2021
 """
 import numpy as np
 
+import numpy as np
+
 class Map:
     def __init__(self, fileName):
         self.map = np.array([]) # 2D array representing a map
@@ -28,7 +30,7 @@ class Map:
         with open(self.fileName) as textFile:
             self.map = np.array([line.split() for line in textFile])
         
-        #print(self.map)
+        print(self.map)
         
         # Searching for start and goal positions on the map
         for row in range(len(self.map)):
@@ -57,12 +59,8 @@ class Agent:
     """
     def randomMove(self):
         nextSteps = self.nextStep()
-        direction = np.random.choice(nextSteps)
-        #print(direction)
-        #print(type(direction))
-        return direction
-    
-    
+        return np.random.choice(nextSteps)
+
     def move(self, direction):
         if direction == 1:
             self.current[1] += 1
@@ -79,7 +77,6 @@ class Agent:
         return self.current
 
 
-
     """
     Returns a list of not blocked directions for a next step. If none found, will return current
     Directions:          1
@@ -88,70 +85,45 @@ class Agent:
                          v
                          3
     Meaning, that going 1 step up is coded as 1, right - 2, down - 3, left - 4 and not moving is 0
-    The [0,0] is located at top left corner
     """
     def nextStep(self):
         possibleDirections = np.array([0])
-        y = self.current[0]
-        x = self.current[1]
+        x = self.current[0]
+        y = self.current[1]
         
-
-        if (self.map[y][(x - 1)] == '.' or self.map[y][(x - 1)] == '1'):
-            possibleDirections = np.append(possibleDirections,1)
-            
-        if (self.map[(y + 1)][x] == '.' or self.map[(y + 1)][x] == '1'):
-            possibleDirections = np.append(possibleDirections,2)
-                      
-        if (self.map[y][(x + 1)] == '.' or self.map[y][(x + 1)] == '1'):
-            possibleDirections = np.append(possibleDirections,3)
-                      
-        if (self.map[(y - 1)][x] == '.' or self.map[(y - 1)][x] == '1'):
-            possibleDirections = np.append(possibleDirections,4)
-
-        
-        #if len(possibleDirections) == 0:
-        #    possibleDirections.append(0)
-        #print("POSSIBLE DIRECTIONS" + str(possibleDirections))
-        """
         if (self.map[x][(y + 1)] == '.' or self.map[x][(y + 1)] == '1'):
             possibleDirections = np.append(possibleDirections,1)
             
-        if x < 18 and (self.map[(x + 1)][y] == '.' or self.map[(x + 1)][y] == '1'):
+        if (self.map[(x + 1)][y] == '.' or self.map[(x + 1)][y] == '1'):
             possibleDirections = np.append(possibleDirections,2)
                       
         if (self.map[x][(y - 1)] == '.' or self.map[x][(y - 1)] == '1'):
             possibleDirections = np.append(possibleDirections,3)
                       
-        if x > 2 and (self.map[(x - 1)][y] == '.' or self.map[(x - 1)][y] == '1'):
+        if (self.map[(x - 1)][y] == '.' or self.map[(x - 1)][y] == '1'):
             possibleDirections = np.append(possibleDirections,4)
-        
-        #if len(possibleDirections) == 0:
-        #    possibleDirections.append(0)
-        # print("POSSIBLE DIRECTIONS")
-        """
-        # print(str(self.map[self.current[0]][(self.current[1] + 1)]) + "---" + 
-        #       str(self.map[(self.current[0] + 1)][self.current[1]]) + "---" + 
-        #       str(self.map[self.current[0]][(self.current[1] - 1)]) + "---" + 
-        #       str(self.map[(self.current[0])][self.current[1]]) + "---")
-        # print(possibleDirections)
+
         return possibleDirections
+
 
 
 """
 keep things to the bare minimum here
-
+"""
 def main():
     my_map = Map("maze_instances/maze1.txt")
     my_map.getMap()
     
     agent = Agent(my_map)
-    for i in range(10):
+    counter = 0
+    while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10000:
+        counter += 1
         direction = agent.randomMove()
         print(direction)
+        print(str(agent.current[0]) + " " + str(agent.current[1]))
         agent.current = agent.move(direction)
 
 
 
 if __name__ == '__main__':
     main()
-"""
