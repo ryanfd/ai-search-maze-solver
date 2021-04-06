@@ -96,14 +96,14 @@ class Agent:
         x = self.current[1]
         
 
-        if (self.map[y][(x + 1)] == '.' or self.map[y][(x + 1)] == '1'):
-            possibleDirections = np.append(possibleDirections,3)
+        if (self.map[y][(x - 1)] == '.' or self.map[y][(x - 1)] == '1'):
+            possibleDirections = np.append(possibleDirections,1)
             
         if (self.map[(y + 1)][x] == '.' or self.map[(y + 1)][x] == '1'):
             possibleDirections = np.append(possibleDirections,2)
                       
-        if (self.map[y][(x - 1)] == '.' or self.map[y][(x - 1)] == '1'):
-            possibleDirections = np.append(possibleDirections,1)
+        if (self.map[y][(x + 1)] == '.' or self.map[y][(x + 1)] == '1'):
+            possibleDirections = np.append(possibleDirections,3)
                       
         if (self.map[(y - 1)][x] == '.' or self.map[(y - 1)][x] == '1'):
             possibleDirections = np.append(possibleDirections,4)
