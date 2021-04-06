@@ -58,6 +58,12 @@ class Agent:
     def randomMove(self):
         nextSteps = self.nextStep()
         direction = np.random.choice(nextSteps)
+        #print(direction)
+        #print(type(direction))
+        return direction
+    
+    
+    def move(self, direction):
         if direction == 1:
             self.current[1] += 1
             
@@ -105,7 +111,7 @@ class Agent:
         
         #if len(possibleDirections) == 0:
         #    possibleDirections.append(0)
-        print("POSSIBLE DIRECTIONS" + str(possibleDirections))
+        #print("POSSIBLE DIRECTIONS" + str(possibleDirections))
         """
         if (self.map[x][(y + 1)] == '.' or self.map[x][(y + 1)] == '1'):
             possibleDirections = np.append(possibleDirections,1)
@@ -133,18 +139,19 @@ class Agent:
 
 """
 keep things to the bare minimum here
-"""
+
 def main():
     my_map = Map("maze_instances/maze1.txt")
     my_map.getMap()
     
     agent = Agent(my_map)
     for i in range(10):
-        move = agent.randomMove()
-        print(move)
-        agent.current = move
+        direction = agent.randomMove()
+        print(direction)
+        agent.current = agent.move(direction)
 
 
 
 if __name__ == '__main__':
     main()
+"""
