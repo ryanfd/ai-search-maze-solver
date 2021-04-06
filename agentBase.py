@@ -30,7 +30,7 @@ class Map:
         with open(self.fileName) as textFile:
             self.map = np.array([line.split() for line in textFile])
         
-        print(self.map)
+        #print(self.map)
         
         # Searching for start and goal positions on the map
         for row in range(len(self.map)):
@@ -116,10 +116,11 @@ def main():
     
     agent = Agent(my_map)
     counter = 0
+    # Code to keep agent moving around for a while. To search for bugs. Actually reached goal cell in 10000 steps
     while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10000:
         counter += 1
         direction = agent.randomMove()
-        print(direction)
+        #print(direction)
         print(str(agent.current[0]) + " " + str(agent.current[1]))
         agent.current = agent.move(direction)
 
