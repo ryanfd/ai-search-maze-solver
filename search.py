@@ -43,6 +43,14 @@ def straight_line_heursitic(current_pos, goal_pos):
     return math.sqrt((goal_pos[0] - current_pos[0])**2 + (goal_pos[1] - current_pos[1])**2)
 
 """
+Manhattan Distance Heuristic
+
+@author: Ryan Donnelly
+"""
+def manhattan_distance_heuristic(current_pos, goal_pos):
+    return abs(goal_pos[0] - current_pos[0]) + abs(goal_pos[1] - current_pos[1])
+
+"""
 Dept-First Search
 Pseudocode: https://en.wikipedia.org/wiki/Depth-first_search#Pseudocode
 
@@ -270,7 +278,7 @@ def main():
     
     agent = agentBase.Agent(my_map)
 
-    print(a_star_search(agent, straight_line_heursitic))
+    print(a_star_search(agent, manhattan_distance_heuristic))
 
 
 
