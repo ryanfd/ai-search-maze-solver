@@ -165,7 +165,8 @@ def a_star_search(self, h):
         # take movement option indices in agentBase.nextStep()...
         # map out viable indices to locations in map
         move_options = self.nextStep()
-        move_list = []
+        move_list =[]
+        
         for i in range(len(move_options)):
             if move_options[i] == 1:
                 move_list.append((node['loc'][0], node['loc'][1]+1))
@@ -173,10 +174,12 @@ def a_star_search(self, h):
                 move_list.append((node['loc'][0]+1, node['loc'][1]))
             if move_options[i] == 3:
                 move_list.append((node['loc'][0], node['loc'][1]-1))
+            #### TODO: when (x-1) issue in agentBase.nextStep() is fixed
             if move_options[i] == 4: 
                 move_list.append((node['loc'][0]-1, node['loc'][1]))
+                
         # end of for in loop
-        
+
         # for valid locations, create movement child
         for move in move_list:
             child = {'loc': move,
@@ -194,16 +197,12 @@ def a_star_search(self, h):
 
 
 def main():
-    my_map1 = agentBase.Map("maze_instances/maze1.txt")
-    my_map1.getMap()
-    my_map2 = agentBase.Map("maze_instances/maze1.txt")
-    my_map2.getMap()
+    my_map = agentBase.Map("maze_instances/maze1.txt")
+    my_map.getMap()
     
-    a1 = agentBase.Agent(my_map1)
-    a2 = agentBase.Agent(my_map2)
+    agent = agentBase.Agent(my_map)
 
-    print(a_star_search(a1, straight_line_heursitic))
-    print(depth_first_search(a2))
+    print(a_star_search(agent, straight_line_heursitic))
 
 
 
