@@ -28,7 +28,7 @@ class Map:
         with open(self.fileName) as textFile:
             self.map = np.array([line.split() for line in textFile])
         
-        print(self.map)
+        # print(self.map)
         
         # Searching for start and goal positions on the map
         for row in range(len(self.map)):
@@ -39,8 +39,9 @@ class Map:
                 elif self.map[row][coll] == '1':
                     self.goal = np.array([row,coll])
                     
-        # print(self.start)
-        # print(self.goal)
+        print(self.start)
+        print(self.goal)
+        # print(len(self.map))
 
 class Agent:
     def __init__(self, my_map):
@@ -78,7 +79,7 @@ class Agent:
         if (self.map[x][(y + 1)] == '.' or self.map[x][(y + 1)] == '1'):
             possibleDirections = np.append(possibleDirections,1)
             
-        if x < 18 and (self.map[(x + 1)][y] == '.' or self.map[(x + 1)][y] == '1'):
+        if x < len(self.map)-3 and (self.map[(x + 1)][y] == '.' or self.map[(x + 1)][y] == '1'):
             possibleDirections = np.append(possibleDirections,2)
                       
         if (self.map[x][(y - 1)] == '.' or self.map[x][(y - 1)] == '1'):

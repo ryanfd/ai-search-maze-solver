@@ -74,7 +74,6 @@ def depth_first_search(self):
 
         node = open_stack.pop() # LIFO
         current_pos = node['loc']
-        print("CURRENT NODE:", current_pos)
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
 
@@ -144,7 +143,6 @@ def breadth_first_search(self):
 
         node = open_list.pop(0) # FIFO
         current_pos = node['loc']
-        print("CURRENT NODE:", current_pos)
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
 
@@ -269,12 +267,12 @@ def a_star_search(self, h):
 
 
 def main():
-    my_map = agentBase.Map("maze_instances/maze1.txt")
+    my_map = agentBase.Map("maze_instances/maze4.txt")
     my_map.getMap()
     
     agent = agentBase.Agent(my_map)
 
-    print(breadth_first_search(agent))
+    print(a_star_search(agent, straight_line_heursitic))
 
 
 
