@@ -72,8 +72,9 @@ def depth_first_search(self):
         if len(open_stack) > max_size_of_open: # space complexity
             max_size_of_open = len(open_stack)
 
-        node = open_stack.pop()
+        node = open_stack.pop() # LIFO
         current_pos = node['loc']
+        print("CURRENT NODE:", current_pos)
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
 
@@ -110,6 +111,76 @@ def depth_first_search(self):
     # end of while loop
 
     return None
+
+"""
+Breadth-First Search
+Pseudocode: https://en.wikipedia.org/wiki/Breadth-first_search#Pseudocode
+
+@author: Ryan Donnelly
+"""
+def breadth_first_search(self):
+    # convert from numpy to regulat list, heappush has problems with numpy
+    start_pos = (self.start[0], self.start[1])
+    goal_pos = (self.goal[0], self.goal[1])
+    current_pos = start_pos
+
+    # initialization
+    print("\nCoordinate Configuration: (Y, X)")
+    print("Start State:", start_pos)
+    print("Goal State:", goal_pos, "\n")
+
+    open_list = []
+    closed_list = dict()
+    root = {'loc': start_pos, 'parent': None}
+    open_list.append(root)
+    closed_list[(root['loc'])] = root
+
+    nodes_expanded = 0
+    max_size_of_open = len(open_list)
+    while len(open_list) > 0:
+        nodes_expanded += 1 # time complexity
+        if len(open_list) > max_size_of_open: # space complexity
+            max_size_of_open = len(open_list)
+
+        node = open_list.pop(0) # FIFO
+        current_pos = node['loc']
+        print("CURRENT NODE:", current_pos)
+        self.current[0] = current_pos[0]
+        self.current[1] = current_pos[1]
+
+        # path to goal state has been found
+        if current_pos == goal_pos:
+            print("SOLUTION FOUND:")
+            print("NODES EXPANDED:", nodes_expanded)
+            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
+            return get_path(node)
+
+        # take movement option indices in agentBase.nextStep()...
+        # map out viable indices to locations in map
+        move_options = self.nextStep()
+        move_list = []
+        for i in range(len(move_options)):
+            if move_options[i] == 1:
+                move_list.append((node['loc'][0], node['loc'][1]+1))
+            if move_options[i] == 2:
+                move_list.append((node['loc'][0]+1, node['loc'][1]))
+            if move_options[i] == 3:
+                move_list.append((node['loc'][0], node['loc'][1]-1))
+            if move_options[i] == 4: 
+                move_list.append((node['loc'][0]-1, node['loc'][1]))
+        # end of for in loop
+
+        # for valid locations, create movement child
+        for move in move_list:
+            child = {'loc': move,
+                    'parent': node}
+            if not (child['loc']) in closed_list: # pruning
+                closed_list[(child['loc'])] = child
+                open_list.append(child)
+        # end of for in loop
+    # end of while loop
+
+        
 
 
 """
@@ -203,7 +274,7 @@ def main():
     
     agent = agentBase.Agent(my_map)
 
-    print(a_star_search(agent, straight_line_heursitic))
+    print(breadth_first_search(agent))
 
 
 
