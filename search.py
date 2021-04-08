@@ -111,6 +111,7 @@ def depth_first_search(self):
 
     return None
 
+
 """
 A* Search
 Pseudocode: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
