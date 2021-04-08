@@ -41,7 +41,6 @@ class Map:
                     
         print(self.start)
         print(self.goal)
-        # print(len(self.map))
 
 class Agent:
     def __init__(self, my_map):
