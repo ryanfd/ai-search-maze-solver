@@ -1,7 +1,11 @@
 import agentBase
+import visualize
 import numpy as np
 import heapq
 import math
+
+# required for animation. Put this wherever you want
+expanded_nodes = []
 
 """
 push_node from mapf project
@@ -49,6 +53,8 @@ Pseudocode: https://en.wikipedia.org/wiki/Depth-first_search#Pseudocode
 @author: Ryan Donnelly
 """
 def depth_first_search(self):
+    expanded_nodes.clear()
+
     # convert from numpy to regulat list, heappush has problems with numpy
     start_pos = (self.start[0], self.start[1])
     goal_pos = (self.goal[0], self.goal[1])
@@ -73,6 +79,7 @@ def depth_first_search(self):
             max_size_of_open = len(open_stack)
 
         node = open_stack.pop() # LIFO
+        expanded_nodes.append(node['loc'])
         current_pos = node['loc']
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
@@ -82,7 +89,7 @@ def depth_first_search(self):
             print("SOLUTION FOUND:")
             print("NODES EXPANDED:", nodes_expanded)
             print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
-            return get_path(node)
+            return get_path(node), expanded_nodes
 
         # take movement option indices in agentBase.nextStep()...
         # map out viable indices to locations in map
@@ -118,6 +125,8 @@ Pseudocode: https://en.wikipedia.org/wiki/Breadth-first_search#Pseudocode
 @author: Ryan Donnelly
 """
 def breadth_first_search(self):
+    expanded_nodes.clear()
+
     # convert from numpy to regulat list, heappush has problems with numpy
     start_pos = (self.start[0], self.start[1])
     goal_pos = (self.goal[0], self.goal[1])
@@ -142,6 +151,7 @@ def breadth_first_search(self):
             max_size_of_open = len(open_list)
 
         node = open_list.pop(0) # FIFO
+        expanded_nodes.append(node['loc'])
         current_pos = node['loc']
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
@@ -151,7 +161,7 @@ def breadth_first_search(self):
             print("SOLUTION FOUND:")
             print("NODES EXPANDED:", nodes_expanded)
             print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
-            return get_path(node)
+            return get_path(node), expanded_nodes
 
         # take movement option indices in agentBase.nextStep()...
         # map out viable indices to locations in map
@@ -197,6 +207,8 @@ def a_star_search(self, h):
     self.current    - agents current position
     """
 
+    expanded_nodes.clear()
+
     # convert from numpy to regulat list, heappush has problems with numpy
     start_pos = (self.start[0], self.start[1])
     goal_pos = (self.goal[0], self.goal[1])
@@ -221,6 +233,7 @@ def a_star_search(self, h):
             max_size_of_open = len(open_list)
 
         node = pop_node(open_list)
+        expanded_nodes.append(node['loc'])
         current_pos = node['loc']
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
@@ -230,7 +243,7 @@ def a_star_search(self, h):
             print("SOLUTION FOUND:")
             print("NODES EXPANDED:", nodes_expanded)
             print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
-            return get_path(node)
+            return get_path(node), expanded_nodes
 
         # take movement option indices in agentBase.nextStep()...
         # map out viable indices to locations in map
@@ -265,13 +278,15 @@ def a_star_search(self, h):
 
 
 def main():
-    my_map = agentBase.Map("maze_instances/maze4.txt")
+    instance = ("maze_instances/maze4.txt") 
+    my_map = agentBase.Map(instance)
     my_map.getMap()
     
     agent = agentBase.Agent(my_map)
 
-    print(a_star_search(agent, straight_line_heursitic))
-
+    sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
+    animation = visualize.Visualize(instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    animation.StartAnimation()
 
 
 if __name__ == '__main__':
