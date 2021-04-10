@@ -37,7 +37,6 @@ class Visualize(object):
         self.ax = None
         self.fig = None
         self.patches = None             # maze components that do change (i.e. path)
-        self.static_patches = None      # maze components that do not change (i.e. walls)
         self.cell_width = 1
         self.animation = None
 
@@ -83,7 +82,7 @@ class Visualize(object):
 
         # setup figure
         aspect = self.maze_num_cols / self.maze_num_rows
-        self.fig = plt.figure(figsize = (6 * aspect, 6))
+        self.fig = plt.figure(figsize = (7 * aspect, 7))
 
         # axes
         self.ax = plt.axes()
@@ -97,7 +96,6 @@ class Visualize(object):
         self.ax.axes.get_xaxis().set_visible(False)
         self.ax.axes.get_yaxis().set_visible(False)
 
-        self.static_patches = []
         self.patches = []
         self.squares = dict()
 
@@ -113,12 +111,11 @@ class Visualize(object):
                 # create rectangle
                 self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width, fc=cell_color, alpha=cell_alpha)
 
-                
                 # create patch out of rectangle
-                if self.maze_map[i][j].value == ".":
+                if (i, j - 1) in self.maze_exp_nodes:
                     self.patches.append(self.ax.add_patch(self.squares[(i, j)]))
                 else:
-                    self.static_patches.append(self.ax.add_patch(self.squares[(i, j)]))
+                    self.ax.add_patch(self.squares[(i, j)])
 
         # animate figure
         self.animation = FuncAnimation(self.fig, 
