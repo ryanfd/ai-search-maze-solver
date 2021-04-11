@@ -297,6 +297,10 @@ def ida_star(self, h):
 
     dist = h(start_pos, goal_pos)
     result = dist
+    nodes_expanded_list = []
+    max_size_of_open_list = []
+    total_time_complexity = 0
+    total_space_complexity = 0
 
     while True:
         open_list = []
@@ -305,15 +309,20 @@ def ida_star(self, h):
         push_node(open_list, root)
         closed_list[(root['loc'])] = root
 
-        nodes_expanded = 0
-        max_size_of_open = len(open_list)
-        result = ida_star_helper(self, open_list, goal_pos, result, closed_list, h, nodes_expanded, max_size_of_open)
+        # returns int if solution not found, path if found
+        result = ida_star_helper(self, open_list, goal_pos, result, closed_list, h, nodes_expanded_list, max_size_of_open_list)
 
         if isinstance(result, np.int64):
+            total_time_complexity += nodes_expanded_list.pop() # add together expanded nodes through multiple calls of search helper
+            if total_space_complexity < max_size_of_open_list[0]:
+                total_space_complexity = max_size_of_open_list.pop()
             if result == -1:
                 return None
         else:
-            return result
+            print("SOLUTION FOUND:")
+            print("NODES EXPANDED:", total_time_complexity)
+            print("MAX SIZE OF OPEN_LIST:", total_space_complexity)
+            return get_path(result)
 
 
 """
@@ -322,7 +331,9 @@ Pseudocode: https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
 
 @author: Ryan Donnelly
 """
-def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expanded, max_size_of_open):
+def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expanded_list, max_size_of_open_list):
+    nodes_expanded = 0
+    max_size_of_open = 0
     curr_dist = -1
 
     while len(open_list) > 0:
@@ -331,17 +342,13 @@ def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expa
             max_size_of_open = len(open_list)
         
         node = pop_node(open_list)
-        print(node['loc'])
         current_pos = node['loc']
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
 
         # path to goal state has been found
         if current_pos == goal_pos:
-            print("SOLUTION FOUND:")
-            print("NODES EXPANDED:", nodes_expanded)
-            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
-            return get_path(node)
+            return node
 
         if node['g_val']+node['h_val'] > bound:
             if curr_dist != -1 and node['g_val']+node['h_val'] < curr_dist:
@@ -377,6 +384,11 @@ def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expa
                 push_node(open_list, child)
         # end of for in loop
     # end of while loop
+
+    # tracking total space + time complexity
+    nodes_expanded_list.append(nodes_expanded)
+    max_size_of_open_list.append(max_size_of_open)
+
     return curr_dist
 
 
