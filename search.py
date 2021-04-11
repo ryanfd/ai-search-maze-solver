@@ -270,6 +270,115 @@ def a_star_search(self, h):
     # end of while
     return None  # Failed to find solutions
 
+"""
+IDA* Search
+Pseudocode: https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
+
+@author: Ryan Donnelly
+"""
+def ida_star(self, h):
+    """
+    h               - chosen heuristic
+    self.map        - maze to solve
+    self.start      - agent starting goal
+    self.goal       - agent end goal
+    self.current    - agents current position
+    """
+
+    # convert from numpy to regulat list, heappush has problems with numpy
+    start_pos = (self.start[0], self.start[1])
+    goal_pos = (self.goal[0], self.goal[1])
+    current_pos = start_pos
+
+    # initialization
+    print("\nCoordinate Configuration: (Y, X)")
+    print("Start State:", start_pos)
+    print("Goal State:", goal_pos, "\n")
+
+    dist = h(start_pos, goal_pos)
+    result = dist
+
+    while True:
+        open_list = []
+        closed_list = dict()
+        root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}
+        push_node(open_list, root)
+        closed_list[(root['loc'])] = root
+
+        nodes_expanded = 0
+        max_size_of_open = len(open_list)
+        result = ida_star_helper(self, open_list, goal_pos, result, closed_list, h, nodes_expanded, max_size_of_open)
+
+        if isinstance(result, np.int64):
+            if result == -1:
+                return None
+        else:
+            return result
+
+
+"""
+IDA* Search Helper
+Pseudocode: https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
+
+@author: Ryan Donnelly
+"""
+def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expanded, max_size_of_open):
+    curr_dist = -1
+
+    while len(open_list) > 0:
+        nodes_expanded += 1 # time complexity
+        if len(open_list) > max_size_of_open: # space complexity
+            max_size_of_open = len(open_list)
+        
+        node = pop_node(open_list)
+        print(node['loc'])
+        current_pos = node['loc']
+        self.current[0] = current_pos[0]
+        self.current[1] = current_pos[1]
+
+        # path to goal state has been found
+        if current_pos == goal_pos:
+            print("SOLUTION FOUND:")
+            print("NODES EXPANDED:", nodes_expanded)
+            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
+            return get_path(node)
+
+        if node['g_val']+node['h_val'] > bound:
+            if curr_dist != -1 and node['g_val']+node['h_val'] < curr_dist:
+                curr_dist = node['g_val']+node['h_val']
+            elif curr_dist == -1:
+                curr_dist = node['g_val']+node['h_val']
+            continue
+
+        # take movement option indices in agentBase.nextStep()...
+        # map out viable indices to locations in map
+        move_options = self.nextStep()
+        move_list =[]
+        
+        for i in range(len(move_options)):
+            if move_options[i] == 1:
+                move_list.append((node['loc'][0], node['loc'][1]+1))
+            if move_options[i] == 2:
+                move_list.append((node['loc'][0]+1, node['loc'][1]))
+            if move_options[i] == 3:
+                move_list.append((node['loc'][0], node['loc'][1]-1))
+            if move_options[i] == 4: 
+                move_list.append((node['loc'][0]-1, node['loc'][1]))
+        # end of for in loop
+
+        # for valid locations, create movement child
+        for move in move_list:
+            child = {'loc': move,
+                    'g_val': node['g_val'] + 1,
+                    'h_val': h(move, goal_pos),
+                    'parent': node}
+            if not (child['loc']) in closed_list: # pruning
+                closed_list[(child['loc'])] = child
+                push_node(open_list, child)
+        # end of for in loop
+    # end of while loop
+    return curr_dist
+
 
 
 def main():
@@ -278,7 +387,7 @@ def main():
     
     agent = agentBase.Agent(my_map)
 
-    print(a_star_search(agent, manhattan_distance_heuristic))
+    print(ida_star(agent, manhattan_distance_heuristic))
 
 
 
