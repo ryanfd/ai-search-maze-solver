@@ -278,14 +278,16 @@ def a_star_search(self, h):
 
 
 def main():
-    instance = ("maze_instances/maze4.txt") 
-    my_map = agentBase.Map(instance)
+
+    maze_instance = ("maze_instances/maze1.txt") 
+    algorithm = "a_star algorithm"
+
+    my_map = agentBase.Map(maze_instance)
     my_map.getMap()
-    
     agent = agentBase.Agent(my_map)
 
     sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
-    animation = visualize.Visualize(instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
     animation.StartAnimation()
 
 

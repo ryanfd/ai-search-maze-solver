@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib.animation import FuncAnimation
-from matplotlib.patches import Rectangle
-import matplotlib.colors as mcolors
 from pathlib import Path
 from random import randrange
 import argparse
@@ -24,20 +23,24 @@ class Visualize(object):
     """ Visualize and animate a maze
     """
 
-    def __init__(self, instance_path, start_pos, goal_pos, sol_path, exp_nodes):
+    def __init__(self, algorithm, instance_path, start_pos, goal_pos, sol_path, exp_nodes):
         # maze related stuff
         self.maze_map = None
         self.maze_num_rows = 0
         self.maze_num_cols = 0
         self.maze_sol_path = sol_path
         self.maze_exp_nodes = exp_nodes
+        self.start_pos = start_pos
+        self.goal_pos = goal_pos
         self.squares = None     # dict indexed by location to obtain underlying Rectangles
 
         # figure related stuff
         self.ax = None
         self.fig = None
         self.patches = None             # maze components that do change (i.e. path)
+        self.algorithm = algorithm
         self.cell_width = 1
+        self.maze_colors = None
         self.animation = None
 
         self.GenerateMaze(instance_path)
@@ -49,15 +52,12 @@ class Visualize(object):
         if not Path(filename).is_file():
             raise BaseException(filename + " not found.")
         
-        # first line of maze instance: #rows #columns
-        f = open(filename)
-        # line = f.readline()
-        # self.maze_num_rows, self.maze_num_cols = [int(x) for x in line.split(' ')]
-        # print("maze_num_rows = ", str(self.maze_num_rows), ", num_columns = ", str(self.maze_num_cols))
+        # colors for each part of maze
+        self.maze_colors = { "wall": "black", "path": "white", "sg": "blue", "exp_nodes": "red", "sol_path": "green" }
 
-        # temporarly hardcoded for now
-        self.maze_num_rows = 103
-        self.maze_num_cols = 201
+        f = open(filename)
+        self.maze_num_rows = len([line.strip("\n") for line in f if line != "\n"])
+        f.seek(0)
         self.maze_map = []
 
         # generate maze of Cell objects
@@ -65,15 +65,18 @@ class Visualize(object):
             line = f.readline()
             self.maze_map.append([])
             for col, value in enumerate(line):
-
                 if value == "#":
-                    self.maze_map[row].append(Cell([row, col], "#", "black", 0.5))
+                    self.maze_map[row].append(Cell([row, col], "#", self.maze_colors["wall"], 0.5))
                 elif value == ".":
-                    self.maze_map[row].append(Cell([row, col], ".", "white", 0.9))
+                    self.maze_map[row].append(Cell([row, col], ".", self.maze_colors["path"], 0.9))
                 elif value == "0" or value == "1":
-                    self.maze_map[row].append(Cell([row, col], "A", "green", 0.9))
+                    self.maze_map[row].append(Cell([row, col], "A", self.maze_colors["sg"], 0.9))
                 # else value == " ":
                 #     self.maze[row].append(Cell([row, col], " ", "white"))
+
+            self.maze_num_cols = (col // 2) + 2
+
+        f.close()
 
 
     def StartAnimation(self):
@@ -82,7 +85,9 @@ class Visualize(object):
 
         # setup figure
         aspect = self.maze_num_cols / self.maze_num_rows
-        self.fig = plt.figure(figsize = (7 * aspect, 7))
+        self.fig = plt.figure(figsize = (8 * aspect, 8))
+
+        self.fig.subplots_adjust(left=0.001)
 
         # axes
         self.ax = plt.axes()
@@ -98,6 +103,22 @@ class Visualize(object):
 
         self.patches = []
         self.squares = dict()
+
+        # setup legend
+        sg_squares = mpatches.Patch(color=self.maze_colors["sg"], label='start and goal')
+        exp_nodes_squares = mpatches.Patch(color=self.maze_colors["exp_nodes"], label='expanded nodes')
+        sol_path_squares = mpatches.Patch(color=self.maze_colors["sol_path"], label='solution path')
+        plt.legend(handles=[sg_squares, exp_nodes_squares, sol_path_squares], loc='center left', bbox_to_anchor=(1., 0.5))
+
+        # don't cover start location with sol_path
+        # self.maze_sol_path.pop(0)
+        # if self.start_pos in self.maze_exp_nodes:
+        #     self.maze_exp_nodes.remove(tuple(self.start_pos))
+        # if self.goal_pos in self.maze_exp_nodes:
+        #     self.maze_exp_nodes.remove(tuple(self.goal_pos))
+
+        # setup title
+        plt.title(label=self.algorithm, loc='center')
 
         # setup initial maze frame: no solution paths
         for i in range(self.maze_num_rows):
