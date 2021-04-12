@@ -1,19 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 26 19:13:46 2021
-
-@author: vladyslav
-"""
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 27 18:00:06 2021
-
-@author: vladyslav
-"""
-import numpy as np
-
 import numpy as np
 
 class Map:
@@ -30,8 +14,6 @@ class Map:
         with open(self.fileName) as textFile:
             self.map = np.array([line.split() for line in textFile])
         
-        #print(self.map)
-        
         # Searching for start and goal positions on the map
         for row in range(len(self.map)):
             for coll in range(len(self.map[row])):
@@ -40,9 +22,6 @@ class Map:
                     self.start = np.array([row,coll])
                 elif self.map[row][coll] == '1':
                     self.goal = np.array([row,coll])
-                    
-        # print(self.start)
-        # print(self.goal)
 
 class Agent:
     def __init__(self, my_map):
@@ -120,7 +99,6 @@ def main():
     while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10000:
         counter += 1
         direction = agent.randomMove()
-        #print(direction)
         print(str(agent.current[0]) + " " + str(agent.current[1]))
         agent.current = agent.move(direction)
 
