@@ -74,7 +74,7 @@ class Visualize(object):
                 # else value == " ":
                 #     self.maze[row].append(Cell([row, col], " ", "white"))
 
-            self.maze_num_cols = (col // 2) + 2
+            self.maze_num_cols = (col // 2)
 
         f.close()
 
