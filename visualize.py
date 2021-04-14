@@ -74,7 +74,7 @@ class Visualize(object):
                 # else value == " ":
                 #     self.maze[row].append(Cell([row, col], " ", "white"))
 
-            self.maze_num_cols = (col // 2)
+            self.maze_num_cols = (col // 2) + 1
 
         f.close()
 
@@ -133,7 +133,7 @@ class Visualize(object):
                 self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width, fc=cell_color, alpha=cell_alpha)
 
                 # create patch out of rectangle
-                if (i, j - 1) in self.maze_exp_nodes:
+                if (i, j) in self.maze_exp_nodes:
                     self.patches.append(self.ax.add_patch(self.squares[(i, j)]))
                 else:
                     self.ax.add_patch(self.squares[(i, j)])
@@ -153,11 +153,11 @@ class Visualize(object):
         # keep popping nodes from exp_nodes list until it pops one that is in the sol_path
         while True:
             exp_row, exp_col = self.maze_exp_nodes.pop(0)
-            self.squares[(exp_row, exp_col + 1)].set_facecolor("red")
+            self.squares[(exp_row, exp_col)].set_facecolor("red")
 
             if (exp_row, exp_col) in self.maze_sol_path:
                 row, col = self.maze_sol_path.pop(0)
-                self.squares[(row, col + 1)].set_facecolor("green")
+                self.squares[(row, col)].set_facecolor("green")
                 break;
 
         return self.patches
