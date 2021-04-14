@@ -5,14 +5,11 @@ import matplotlib.patches as mpatches
 from matplotlib.animation import FuncAnimation
 from pathlib import Path
 from random import randrange
-import argparse
-
 
 class Cell(object):
     """ A cell in a maze
     """
-    def __init__(self, loc, value, color, alpha):
-        self.location = loc     # this is the same as the loc in the maze... need?
+    def __init__(self, value, color, alpha):
         self.value = value      # the ascii value of the maze cell ('#', '.', '0', etc.)
         self.color = color      # face color of cell
         self.alpha = alpha        # alpha of cell 
@@ -66,15 +63,19 @@ class Visualize(object):
             self.maze_map.append([])
             for col, value in enumerate(line):
                 if value == "#":
-                    self.maze_map[row].append(Cell([row, col], "#", self.maze_colors["wall"], 0.5))
+                    self.maze_map[row].append(Cell("#", self.maze_colors["wall"], 0.5))
                 elif value == ".":
-                    self.maze_map[row].append(Cell([row, col], ".", self.maze_colors["path"], 0.9))
+                    self.maze_map[row].append(Cell(".", self.maze_colors["path"], 0.9))
                 elif value == "0" or value == "1":
-                    self.maze_map[row].append(Cell([row, col], "A", self.maze_colors["sg"], 0.9))
+                    self.maze_map[row].append(Cell("A", self.maze_colors["sg"], 0.9))
                 # else value == " ":
-                #     self.maze[row].append(Cell([row, col], " ", "white"))
+                #     self.maze[row].append(Cell(" ", "white"))
 
             self.maze_num_cols = (col // 2) + 1
+
+
+        print("num rows = ", str(self.maze_num_rows))
+        print("num cols = ", str(self.maze_num_cols))
 
         f.close()
 
@@ -120,6 +121,15 @@ class Visualize(object):
         # setup title
         plt.title(label=self.algorithm, loc='center')
 
+#         for i in range(self.maze_num_rows):
+#             for j in range(self.maze_num_cols):
+
+
+
+
+
+
+
         # setup initial maze frame: no solution paths
         for i in range(self.maze_num_rows):
             for j in range(self.maze_num_cols):
@@ -128,9 +138,36 @@ class Visualize(object):
                 cell_loc = (j * self.cell_width, self.maze_num_rows - (i * self.cell_width + 1))
                 cell_color = self.maze_map[i][j].color
                 cell_alpha = self.maze_map[i][j].alpha
+                
+                # change wall width to makee maze prettier
+                # but leave perimeter walls the same
+                # if self.maze_map[i][j].value == "#" and (i != 0 and i != self.maze_num_cols - 1) and (j != 0 and j != 1 and j != self.maze_num_rows - 1 and j != self.maze_num_rows - 2):
+                # self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width, fc=cell_color, alpha=cell_alpha)
 
-                # create rectangle
-                self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width, fc=cell_color, alpha=cell_alpha)
+                # a non-perimeter wall
+                if self.maze_map[i][j].value == "#" and (j < self.maze_num_cols - 1 and j > 1 and i < self.maze_num_rows - 1 and i > 1):
+
+                    cell_x_width = self.cell_width
+                    cell_y_width = self.cell_width
+
+                    # horizontal wall
+                    if self.maze_map[i][j + 1].value == "#" or self.maze_map[i][j - 1].value == "#":
+                        # self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width / 2, fc=cell_color, alpha=cell_alpha)
+                        cell_y_width = self.cell_width / 2
+
+
+                    # vertical wall
+                    if self.maze_map[i + 1][j].value == "#" or self.maze_map[i - 1][j].value == "#":
+                        # self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width / 2, self.cell_width, fc=cell_color, alpha=cell_alpha)
+                        cell_x_width = self.cell_width / 2
+
+                    # not a vertical wall or a horizontal wall
+                    # else:
+                    self.squares[(i, j)] = plt.Rectangle((cell_loc), cell_x_width, cell_y_width, fc=cell_color, alpha=cell_alpha)
+
+                # not a wall
+                else:
+                        self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width, fc=cell_color, alpha=cell_alpha)
 
                 # create patch out of rectangle
                 if (i, j) in self.maze_exp_nodes:
@@ -152,12 +189,13 @@ class Visualize(object):
 
         # keep popping nodes from exp_nodes list until it pops one that is in the sol_path
         while True:
-            exp_row, exp_col = self.maze_exp_nodes.pop(0)
-            self.squares[(exp_row, exp_col)].set_facecolor("red")
+            # exp_row, exp_col = self.maze_exp_nodes.pop(0)
+            # self.squares[(exp_row, exp_col)].set_facecolor("red")
 
             if (exp_row, exp_col) in self.maze_sol_path:
-                row, col = self.maze_sol_path.pop(0)
-                self.squares[(row, col)].set_facecolor("green")
+                pass
+                # row, col = self.maze_sol_path.pop(0)
+                # self.squares[(row, col)].set_facecolor("green")
                 break;
 
         return self.patches
