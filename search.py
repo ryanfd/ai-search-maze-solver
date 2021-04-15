@@ -280,7 +280,7 @@ def a_star_search(self, h):
 
 def main():
 
-    maze_instance = ("maze_instances/maze1.txt") 
+    maze_instance = ("maze_instances/spiral_with_holes.txt") 
     algorithm = "a_star algorithm"
 
     my_map = agentBase.Map(maze_instance)
@@ -289,9 +289,9 @@ def main():
 
     # sol_path, exp_nodes = breadth_first_search(agent)
     sol_path, exp_nodes = depth_first_search(agent)
-    animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
     # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
 
+    animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
     animation.StartAnimation()
 
 
