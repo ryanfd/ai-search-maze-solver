@@ -47,14 +47,6 @@ def straight_line_heursitic(current_pos, goal_pos):
     return math.sqrt((goal_pos[0] - current_pos[0])**2 + (goal_pos[1] - current_pos[1])**2)
 
 """
-Manhattan Distance Heuristic
-
-@author: Ryan Donnelly
-"""
-def manhattan_distance_heuristic(current_pos, goal_pos):
-    return abs(goal_pos[0] - current_pos[0]) + abs(goal_pos[1] - current_pos[1])
-
-"""
 Dept-First Search
 Pseudocode: https://en.wikipedia.org/wiki/Depth-first_search#Pseudocode
 
@@ -284,143 +276,22 @@ def a_star_search(self, h):
     # end of while
     return None  # Failed to find solutions
 
-"""
-IDA* Search
-Pseudocode: https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
-
-@author: Ryan Donnelly
-"""
-def ida_star(self, h):
-    """
-    h               - chosen heuristic
-    self.map        - maze to solve
-    self.start      - agent starting goal
-    self.goal       - agent end goal
-    self.current    - agents current position
-    """
-
-    # convert from numpy to regulat list, heappush has problems with numpy
-    start_pos = (self.start[0], self.start[1])
-    goal_pos = (self.goal[0], self.goal[1])
-    current_pos = start_pos
-
-    # initialization
-    print("\nCoordinate Configuration: (Y, X)")
-    print("Start State:", start_pos)
-    print("Goal State:", goal_pos, "\n")
-
-    dist = h(start_pos, goal_pos)
-    result = dist
-    nodes_expanded_list = []
-    max_size_of_open_list = []
-    total_time_complexity = 0
-    total_space_complexity = 0
-
-    while True:
-        open_list = []
-        closed_list = dict()
-        root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}
-        push_node(open_list, root)
-        closed_list[(root['loc'])] = root
-
-        # returns int if solution not found, path if found
-        result = ida_star_helper(self, open_list, goal_pos, result, closed_list, h, nodes_expanded_list, max_size_of_open_list)
-
-        if isinstance(result, np.int64):
-            total_time_complexity += nodes_expanded_list.pop() # add together expanded nodes through multiple calls of search helper
-            if total_space_complexity < max_size_of_open_list[0]:
-                total_space_complexity = max_size_of_open_list.pop()
-            if result == -1:
-                return None
-        else:
-            print("SOLUTION FOUND:")
-            print("NODES EXPANDED:", total_time_complexity)
-            print("MAX SIZE OF OPEN_LIST:", total_space_complexity)
-            return get_path(result)
-
-
-"""
-IDA* Search Helper
-Pseudocode: https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
-
-@author: Ryan Donnelly
-"""
-def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expanded_list, max_size_of_open_list):
-    nodes_expanded = 0
-    max_size_of_open = 0
-    curr_dist = -1
-
-    while len(open_list) > 0:
-        nodes_expanded += 1 # time complexity
-        if len(open_list) > max_size_of_open: # space complexity
-            max_size_of_open = len(open_list)
-        
-        node = pop_node(open_list)
-        current_pos = node['loc']
-        self.current[0] = current_pos[0]
-        self.current[1] = current_pos[1]
-
-        # path to goal state has been found
-        if current_pos == goal_pos:
-            return node
-
-        if node['g_val']+node['h_val'] > bound:
-            if curr_dist != -1 and node['g_val']+node['h_val'] < curr_dist:
-                curr_dist = node['g_val']+node['h_val']
-            elif curr_dist == -1:
-                curr_dist = node['g_val']+node['h_val']
-            continue
-
-        # take movement option indices in agentBase.nextStep()...
-        # map out viable indices to locations in map
-        move_options = self.nextStep()
-        move_list =[]
-        
-        for i in range(len(move_options)):
-            if move_options[i] == 1:
-                move_list.append((node['loc'][0], node['loc'][1]+1))
-            if move_options[i] == 2:
-                move_list.append((node['loc'][0]+1, node['loc'][1]))
-            if move_options[i] == 3:
-                move_list.append((node['loc'][0], node['loc'][1]-1))
-            if move_options[i] == 4: 
-                move_list.append((node['loc'][0]-1, node['loc'][1]))
-        # end of for in loop
-
-        # for valid locations, create movement child
-        for move in move_list:
-            child = {'loc': move,
-                    'g_val': node['g_val'] + 1,
-                    'h_val': h(move, goal_pos),
-                    'parent': node}
-            if not (child['loc']) in closed_list: # pruning
-                closed_list[(child['loc'])] = child
-                push_node(open_list, child)
-        # end of for in loop
-    # end of while loop
-
-    # tracking total space + time complexity
-    nodes_expanded_list.append(nodes_expanded)
-    max_size_of_open_list.append(max_size_of_open)
-
-    return curr_dist
 
 
 def main():
 
-    # modify these lines to change algorithm or change maze instance
-    search_algorithm = a_star_search
-    maze_instance = ("maze_instances/straight_line.txt") 
+    maze_instance = ("maze_instances/maze1.txt") 
+    algorithm = "a_star algorithm"
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
     agent = agentBase.Agent(my_map)
 
-    # run search
-    sol_path, exp_nodes = search_algorithm(agent, straight_line_heursitic)
+    # sol_path, exp_nodes = breadth_first_search(agent)
+    sol_path, exp_nodes = depth_first_search(agent)
+    animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
 
-    # run animation for search
-    animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
     animation.StartAnimation()
 
 

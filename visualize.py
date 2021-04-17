@@ -1,44 +1,54 @@
 #!/usr/bin/env python3
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib.animation import FuncAnimation
-from matplotlib.patches import Rectangle
 from pathlib import Path
 from random import randrange
 import argparse
-
-# # every 2d coordinate in the figure is a Rectangle()
-# # each Rectangle() is accessable by indexing the squares dictionary with the Rectangles coordinates
-# # Therefore, the squares dictionary holds the rectangle objects
-# # every 2d coordinate must be a matplotlib.patch, so that we can draw it on screen
-# # we shall set each patch as a square, so that we can index the square by the coordinate to get the underlying Rectangle() for that coordinate
-# for all squares in maze:
-#     square = plt.Rectangle((j, i))
-#     self.squares[(i, j)] = square
-#     self.patches.append(self.ax.add_patch(self.squares[(i, j)]))
-
-# # whenever we want to change a 2d coordinate on the plot, we use the setters/getters for the associated patch, which are actually squares, and since they are squares (which is a dictionary), the underlying Rectangle() is accessable
-# self.squares[(2, 2)].set_facecolor("red")
 
 
 class Cell(object):
     """ A cell in a maze
     """
-    def __init__(self, loc, value, color):
+    def __init__(self, loc, value, color, alpha):
         self.location = loc     # this is the same as the loc in the maze... need?
         self.value = value      # the ascii value of the maze cell ('#', '.', '0', etc.)
         self.color = color      # face color of cell
-        self.alpha = 0.4        # alpha of cell 
+        self.alpha = alpha        # alpha of cell 
         self.active = False
 
 
-class Maze:
-    """ A maze is a 2-Dimensional grid of Cell objects.
+class Visualize(object):
+    """ Visualize and animate a maze
     """
-    def __init__(self):
-        self.num_rows = 0
-        self.num_cols = 0
-        self.maze = None
+
+    def __init__(self, algorithm, instance_path, start_pos, goal_pos, sol_path, exp_nodes):
+        # maze related stuff
+        self.maze_map = None
+        self.maze_num_rows = 0
+        self.maze_num_cols = 0
+        self.map_size = 0
+        self.maze_sol_path = sol_path
+        self.maze_exp_nodes = exp_nodes
+        self.start_pos = start_pos
+        self.goal_pos = goal_pos
+        print("visualize init: start_pos = ", str(self.start_pos))
+        print("visualize init: goal_pos = ", str(self.goal_pos))
+        self.squares = None     # dict indexed by location to obtain underlying Rectangles
+
+        # figure related stuff
+        self.ax = None
+        self.fig = None
+        self.patches = None             # maze components that do change (i.e. path)
+        self.algorithm = algorithm
+        self.cell_width = 1
+        self.maze_colors = None
+        self.animation = None
+        self.pop_count = 0
+        self.map_percentage = 0
+
+        self.GenerateMaze(instance_path)
 
     def GenerateMaze(self, filename):
         """ generate a maze from a binary obstacle grid
@@ -47,80 +57,49 @@ class Maze:
         if not Path(filename).is_file():
             raise BaseException(filename + " not found.")
         
-        # first line of maze instance: #rows #columns
-        f = open(filename)
-        line = f.readline()
-        self.num_rows, self.num_cols = [int(x) for x in line.split(' ')]
-        print("num_rows = ", str(self.num_rows), ", num_columns = ", str(self.num_cols))
+        # colors for each part of maze
+        self.maze_colors = { "wall": "black", "path": "white", "sg": "blue", "exp_nodes": "red", "sol_path": "green" }
 
-        self.maze = []
+        f = open(filename)
+        self.maze_num_rows = len([line.strip("\n") for line in f if line != "\n"])
+        f.seek(0)
+        self.maze_map = []
 
         # generate maze of Cell objects
-        for row in range(self.num_rows):
+        for row in range(self.maze_num_rows):
             line = f.readline()
-            self.maze.append([])
+            self.maze_map.append([])
             for col, value in enumerate(line):
-
                 if value == "#":
-                    self.maze[row].append(Cell([row, col], "#", "black"))
+                    self.maze_map[row].append(Cell([row, col], "#", self.maze_colors["wall"], 0.7))
                 elif value == ".":
-                    self.maze[row].append(Cell([row, col], ".", "white"))
+                    self.maze_map[row].append(Cell([row, col], ".", self.maze_colors["path"], 0.7))
+                    self.map_size += 1
                 elif value == "0" or value == "1":
-                    self.maze[row].append(Cell([row, col], "A", "green"))
+                    self.maze_map[row].append(Cell([row, col], "A", self.maze_colors["sg"], 0.9))
+                    self.map_size += 1
                 # else value == " ":
                 #     self.maze[row].append(Cell([row, col], " ", "white"))
 
-        return self.maze
+            self.maze_num_cols = (col // 2) + 1
 
+        f.close()
 
-class Visualize():
-    """ Visualize and animate a maze
-    """
-
-    def __init__(self, maze_obj):
-        self.maze_obj = maze_obj
-        self.ax = None
-        self.fig = None
-        self.patches = None
-        self.cell_width = 1
-        self.animation = None
-        self.squares = None     # dict indexed by location to obtain underlying Rectangles
-
-    # create the base frame upon which the animation takes place
-    def initFrame(self):
-        self.patches = []
-        self.squares = dict()
-
-        # initial maze: no solution paths
-        for i in range(self.maze_obj.num_rows):
-            for j in range(self.maze_obj.num_cols):
-
-                # initial cell attributes
-                cell_loc = (j * self.cell_width, self.maze_obj.num_rows - (i * self.cell_width + 1))
-                cell_color = self.maze_obj.maze[i][j].color
-                cell_alpha = self.maze_obj.maze[i][j].alpha
-
-                # create patch
-                self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width, fc=cell_color, alpha=cell_alpha)
-                self.patches.append(self.ax.add_patch(self.squares[(i, j)]))
-
-        # must return self.patches, 
-        # it tells the animator update the patches object on the plot after each frame
-        return self.patches
-
-        # self.maze_obj.maze[2][2].color = "red"
-        # self.squares[(2, 2)].set_facecolor("red")
 
     def StartAnimation(self):
         """ initializes figure and begins the animation.
         """
 
-        self.fig = plt.figure(figsize = (9, 9))
+        # setup figure
+        aspect = self.maze_num_cols / self.maze_num_rows
+        self.fig = plt.figure(figsize = (7 * aspect, 7))
+
+        self.fig.subplots_adjust(left=0.001)
 
         # axes
         self.ax = plt.axes()
-        plt.xlim([0, self.maze_obj.num_cols])
-        plt.ylim([0, self.maze_obj.num_rows])
+        plt.xlim([0, self.maze_num_cols])
+        plt.ylim([0, self.maze_num_rows])
 
         # Set an equal aspect ratio
         self.ax.set_aspect("equal")
@@ -129,13 +108,51 @@ class Visualize():
         self.ax.axes.get_xaxis().set_visible(False)
         self.ax.axes.get_yaxis().set_visible(False)
 
+        self.patches = []
+        self.squares = dict()
+
+        # setup legend
+        sg_squares = mpatches.Patch(color=self.maze_colors["sg"], label='start and goal')
+        exp_nodes_squares = mpatches.Patch(color=self.maze_colors["exp_nodes"], label='expanded nodes')
+        sol_path_squares = mpatches.Patch(color=self.maze_colors["sol_path"], label='solution path')
+        plt.legend(handles=[sg_squares, exp_nodes_squares, sol_path_squares], loc='center left', bbox_to_anchor=(1.05, 0.5))
+
+        # setup title
+        plt.title(label=self.algorithm, loc='center')
+
+        # don't cover start location with solution path
+        # print("exp_nodes = ", str(self.maze_exp_nodes))
+        print("start location = ", str(self.start_pos))
+        print("goal location = ", str(self.goal_pos))
+        self.maze_sol_path.pop(0)
+            
+        # setup initial maze frame: no solution paths
+        for i in range(self.maze_num_rows):
+            for j in range(self.maze_num_cols):
+
+                # initial cell attributes
+                cell_loc = (j * self.cell_width, self.maze_num_rows - (i * self.cell_width + 1))
+                cell_color = self.maze_map[i][j].color
+                cell_alpha = self.maze_map[i][j].alpha
+
+                # create rectangle
+                self.squares[(i, j)] = plt.Rectangle((cell_loc), self.cell_width, self.cell_width, fc=cell_color, alpha=cell_alpha)
+
+                # create patch out of rectangle
+                if (i, j) in self.maze_exp_nodes:
+                    self.patches.append(self.ax.add_patch(self.squares[(i, j)]))
+                else:
+                    self.ax.add_patch(self.squares[(i, j)])
+
+        self.squares[(-1, -1)] = plt.text(1, 1, "")
+        self.patches.append(self.squares[(-1, -1)])
+        
         # animate figure
-        # frames should equal length of solution path
         self.animation = FuncAnimation(self.fig, 
                                        self.UpdateAnimation,
-                                       init_func=self.initFrame,
-                                       frames=100,    # each frame of the animation
-                                       interval=100,  # should be adjustable in the end
+                                       frames=len(self.maze_sol_path),
+                                       repeat=False,
+                                       interval=200,  # should be adjustable in the end
                                        blit=True)
 
         self.ShowFigure()
@@ -143,13 +160,37 @@ class Visualize():
     # updates animation every frame to show new maze figure
     def UpdateAnimation(self, frameNumber):
 
-        rand_row = randrange(self.maze_obj.num_rows)
-        rand_col = randrange(self.maze_obj.num_cols)
+        # don't cover start and goal locations with sol_path or exp_nodes
+        # self.maze_sol_path.pop(0)
 
-        self.squares[(rand_row, rand_col)].set_facecolor("red")
+        # if tuple(self.start_pos) in self.maze_exp_nodes:
+        #     print("still inside before")
 
-        # must return self.patches, 
-        # it tells the animaton framework to update the patches object on the plot
+        # if tuple(self.start_pos) in self.maze_exp_nodes:
+        #     index = self.maze_exp_nodes.index(tuple(self.start_pos))
+        #     del self.maze_exp_nodes[index]
+
+        # if tuple(self.start_pos) in self.maze_exp_nodes:
+        #     print("still inside after")
+
+        # keep popping nodes from exp_nodes list until it pops one that is in the sol_path
+        while True:
+            try:
+                exp_nodes_entry = self.maze_exp_nodes.pop(0)
+            except IndexError:
+                self.animation.event_source.stop()
+
+            self.pop_count += 1
+            self.map_percentage = (self.pop_count / self.map_size) * 100
+            if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos):
+                self.squares[exp_nodes_entry].set_facecolor("red")
+
+            if exp_nodes_entry in self.maze_sol_path:
+                row, col = self.maze_sol_path.pop(0)
+                self.squares[(row, col)].set_facecolor("green")
+                break;
+
+        self.squares[(-1, -1)].set_text("map expanded: {}%".format(round(self.map_percentage, 0)))
         return self.patches
 
 
