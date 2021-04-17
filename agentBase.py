@@ -1,17 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 26 19:13:46 2021
-
-@author: vladyslav
-"""
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 27 18:00:06 2021
-
-@author: vladyslav
-"""
 import numpy as np
 
 class Map:
@@ -28,8 +14,6 @@ class Map:
         with open(self.fileName) as textFile:
             self.map = np.array([line.split() for line in textFile])
         
-        print(self.map)
-        
         # Searching for start and goal positions on the map
         for row in range(len(self.map)):
             for coll in range(len(self.map[row])):
@@ -38,9 +22,6 @@ class Map:
                     self.start = np.array([row,coll])
                 elif self.map[row][coll] == '1':
                     self.goal = np.array([row,coll])
-                    
-        # print(self.start)
-        # print(self.goal)
 
 class Agent:
     def __init__(self, my_map):
@@ -59,7 +40,21 @@ class Agent:
         nextSteps = self.nextStep()
         return np.random.choice(nextSteps)
 
-   
+    def move(self, direction):
+        if direction == 1:
+            self.current[1] += 1
+            
+        if direction == 2:
+            self.current[0] += 1
+            
+        if direction == 3:
+            self.current[1] -= 1
+            
+        if direction == 4:
+            self.current[0] -= 1
+            
+        return self.current
+
 
     """
     Returns a list of not blocked directions for a next step. If none found, will return current
@@ -78,24 +73,17 @@ class Agent:
         if (self.map[x][(y + 1)] == '.' or self.map[x][(y + 1)] == '1'):
             possibleDirections = np.append(possibleDirections,1)
             
-        if x < 18 and (self.map[(x + 1)][y] == '.' or self.map[(x + 1)][y] == '1'):
+        if (self.map[(x + 1)][y] == '.' or self.map[(x + 1)][y] == '1'):
             possibleDirections = np.append(possibleDirections,2)
                       
         if (self.map[x][(y - 1)] == '.' or self.map[x][(y - 1)] == '1'):
             possibleDirections = np.append(possibleDirections,3)
                       
-        if x > 2 and (self.map[(x - 1)][y] == '.' or self.map[(x - 1)][y] == '1'):
+        if (self.map[(x - 1)][y] == '.' or self.map[(x - 1)][y] == '1'):
             possibleDirections = np.append(possibleDirections,4)
-        
-        #if len(possibleDirections) == 0:
-        #    possibleDirections.append(0)
-        # print("POSSIBLE DIRECTIONS")
-        # print(str(self.map[self.current[0]][(self.current[1] + 1)]) + "---" + 
-        #       str(self.map[(self.current[0] + 1)][self.current[1]]) + "---" + 
-        #       str(self.map[self.current[0]][(self.current[1] - 1)]) + "---" + 
-        #       str(self.map[(self.current[0])][self.current[1]]) + "---")
-        # print(possibleDirections)
+
         return possibleDirections
+
 
 
 """
@@ -106,8 +94,13 @@ def main():
     my_map.getMap()
     
     agent = Agent(my_map)
-    for i in range(10):
-        print(agent.randomMove())
+    counter = 0
+    # Code to keep agent moving around for a while. To search for bugs. Actually reached goal cell in 10000 steps
+    while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10000:
+        counter += 1
+        direction = agent.randomMove()
+        print(str(agent.current[0]) + " " + str(agent.current[1]))
+        agent.current = agent.move(direction)
 
 
 
