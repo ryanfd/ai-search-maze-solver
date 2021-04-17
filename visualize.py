@@ -118,7 +118,7 @@ class Visualize(object):
         plt.legend(handles=[sg_squares, exp_nodes_squares, sol_path_squares], loc='center left', bbox_to_anchor=(1.05, 0.5))
 
         # setup title
-        plt.title(label=self.algorithm, loc='center')
+        # plt.title(label=self.algorithm, loc='center')
 
         # don't cover start location with solution path
         # print("exp_nodes = ", str(self.maze_exp_nodes))
