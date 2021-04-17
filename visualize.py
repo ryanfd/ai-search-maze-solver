@@ -28,6 +28,7 @@ class Visualize(object):
         self.maze_map = None
         self.maze_num_rows = 0
         self.maze_num_cols = 0
+        self.map_size = 0
         self.maze_sol_path = sol_path
         self.maze_exp_nodes = exp_nodes
         self.start_pos = start_pos
@@ -44,6 +45,8 @@ class Visualize(object):
         self.cell_width = 1
         self.maze_colors = None
         self.animation = None
+        self.pop_count = 0
+        self.map_percentage = 0
 
         self.GenerateMaze(instance_path)
 
@@ -71,8 +74,10 @@ class Visualize(object):
                     self.maze_map[row].append(Cell([row, col], "#", self.maze_colors["wall"], 0.7))
                 elif value == ".":
                     self.maze_map[row].append(Cell([row, col], ".", self.maze_colors["path"], 0.7))
+                    self.map_size += 1
                 elif value == "0" or value == "1":
                     self.maze_map[row].append(Cell([row, col], "A", self.maze_colors["sg"], 0.9))
+                    self.map_size += 1
                 # else value == " ":
                 #     self.maze[row].append(Cell([row, col], " ", "white"))
 
@@ -100,8 +105,8 @@ class Visualize(object):
         self.ax.set_aspect("equal")
 
         # Remove the axes from the figure
-        # self.ax.axes.get_xaxis().set_visible(False)
-        # self.ax.axes.get_yaxis().set_visible(False)
+        self.ax.axes.get_xaxis().set_visible(False)
+        self.ax.axes.get_yaxis().set_visible(False)
 
         self.patches = []
         self.squares = dict()
@@ -139,10 +144,14 @@ class Visualize(object):
                 else:
                     self.ax.add_patch(self.squares[(i, j)])
 
+        self.squares[(-1, -1)] = plt.text(1, 1, "")
+        self.patches.append(self.squares[(-1, -1)])
+        
         # animate figure
         self.animation = FuncAnimation(self.fig, 
                                        self.UpdateAnimation,
                                        frames=len(self.maze_sol_path),
+                                       repeat=False,
                                        interval=200,  # should be adjustable in the end
                                        blit=True)
 
@@ -166,7 +175,13 @@ class Visualize(object):
 
         # keep popping nodes from exp_nodes list until it pops one that is in the sol_path
         while True:
-            exp_nodes_entry = self.maze_exp_nodes.pop(0)
+            try:
+                exp_nodes_entry = self.maze_exp_nodes.pop(0)
+            except IndexError:
+                self.animation.event_source.stop()
+
+            self.pop_count += 1
+            self.map_percentage = (self.pop_count / self.map_size) * 100
             if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos):
                 self.squares[exp_nodes_entry].set_facecolor("red")
 
@@ -175,6 +190,7 @@ class Visualize(object):
                 self.squares[(row, col)].set_facecolor("green")
                 break;
 
+        self.squares[(-1, -1)].set_text("map expanded: {}%".format(round(self.map_percentage, 0)))
         return self.patches
 
 

@@ -277,21 +277,21 @@ def a_star_search(self, h):
     return None  # Failed to find solutions
 
 
-
 def main():
 
-    maze_instance = ("maze_instances/spiral_with_holes.txt") 
-    algorithm = "a_star algorithm"
+    # modify these lines to change algorithm or change maze instance
+    search_algorithm = a_star_search
+    maze_instance = ("maze_instances/straight_line.txt") 
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
     agent = agentBase.Agent(my_map)
 
-    # sol_path, exp_nodes = breadth_first_search(agent)
-    sol_path, exp_nodes = depth_first_search(agent)
-    # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
+    # run search
+    sol_path, exp_nodes = search_algorithm(agent, straight_line_heursitic)
 
-    animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    # run animation for search
+    animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
     animation.StartAnimation()
 
 
