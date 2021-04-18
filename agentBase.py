@@ -23,6 +23,7 @@ class Map:
                 elif self.map[row][coll] == '1':
                     self.goal = np.array([row,coll])
 
+
 class Agent:
     def __init__(self, my_map):
         self.map = my_map.map                      # 2D array representing a map
