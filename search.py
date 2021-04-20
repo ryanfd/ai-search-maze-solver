@@ -409,7 +409,7 @@ def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expa
 def main():
 
     # modify these lines to change algorithm or change maze instance
-    search_algorithm = a_star_search
+    search_algorithm = depth_first_search
     maze_instance = ("maze_instances/start_far_from_goal.txt") 
 
     my_map = agentBase.Map(maze_instance)
@@ -419,7 +419,7 @@ def main():
     agent = agentBase.Agent(my_map)
 
     # run search
-    sol_path, exp_nodes = search_algorithm(agent, )
+    sol_path, exp_nodes = search_algorithm(agent)
 
     # run animation for search
     animation = visualize.Visualize(maze_instance, start_loc, goal_loc, sol_path, exp_nodes)
