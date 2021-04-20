@@ -281,17 +281,19 @@ def main():
 
     # modify these lines to change algorithm or change maze instance
     search_algorithm = a_star_search
-    maze_instance = ("maze_instances/straight_line.txt") 
+    maze_instance = ("maze_instances/start_far_from_goal.txt") 
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
+    start_loc = my_map.start.copy()
+    goal_loc = my_map.goal.copy()
     agent = agentBase.Agent(my_map)
 
     # run search
-    sol_path, exp_nodes = search_algorithm(agent, straight_line_heursitic)
+    sol_path, exp_nodes = search_algorithm(agent, )
 
     # run animation for search
-    animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    animation = visualize.Visualize(maze_instance, start_loc, goal_loc, sol_path, exp_nodes)
     animation.StartAnimation()
 
 

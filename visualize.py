@@ -23,7 +23,7 @@ class Visualize(object):
     """ Visualize and animate a maze
     """
 
-    def __init__(self, algorithm, instance_path, start_pos, goal_pos, sol_path, exp_nodes):
+    def __init__(self, instance_path, start_pos, goal_pos, sol_path, exp_nodes):
         # maze related stuff
         self.maze_map = None
         self.maze_num_rows = 0
@@ -33,20 +33,18 @@ class Visualize(object):
         self.maze_exp_nodes = exp_nodes
         self.start_pos = start_pos
         self.goal_pos = goal_pos
-        print("visualize init: start_pos = ", str(self.start_pos))
-        print("visualize init: goal_pos = ", str(self.goal_pos))
         self.squares = None     # dict indexed by location to obtain underlying Rectangles
 
         # figure related stuff
         self.ax = None
         self.fig = None
         self.patches = None             # maze components that do change (i.e. path)
-        self.algorithm = algorithm
         self.cell_width = 1
         self.maze_colors = None
         self.animation = None
         self.pop_count = 0
         self.map_percentage = 0
+        self.iteration = 0
 
         self.GenerateMaze(instance_path)
 
@@ -98,7 +96,7 @@ class Visualize(object):
 
         # axes
         self.ax = plt.axes()
-        plt.xlim([0, self.maze_num_cols])
+        plt.xlim([0, self.maze_num_cols]) 
         plt.ylim([0, self.maze_num_rows])
 
         # Set an equal aspect ratio
@@ -111,20 +109,23 @@ class Visualize(object):
         self.patches = []
         self.squares = dict()
 
-        # setup legend
+        # setup initial legend
         sg_squares = mpatches.Patch(color=self.maze_colors["sg"], label='start and goal')
         exp_nodes_squares = mpatches.Patch(color=self.maze_colors["exp_nodes"], label='expanded nodes')
         sol_path_squares = mpatches.Patch(color=self.maze_colors["sol_path"], label='solution path')
-        plt.legend(handles=[sg_squares, exp_nodes_squares, sol_path_squares], loc='center left', bbox_to_anchor=(1.05, 0.5))
+        exp_nodes_p = mpatches.Patch(color=self.maze_colors["exp_nodes"], label='{}% map expanded'.format(round(self.map_percentage, 0)))
+        plt.legend(handles=[sg_squares, sol_path_squares, exp_nodes_squares, exp_nodes_p], loc='center left', bbox_to_anchor=(1.01, 0.5))
 
         # setup title
-        plt.title(label=self.algorithm, loc='center')
+        title_str = "A* Search \n straight-line heuristic"
+        plt.title(label=title_str, fontsize=18, loc='center')
+        self.t1 = self.fig.text(0.25, 0.05, "iteration #0", ha='center')
+        self.t2 = self.fig.text(0.75, 0.05, "nodes expanded: {}".format(self.pop_count), ha='center')
 
-        # don't cover start location with solution path
-        # print("exp_nodes = ", str(self.maze_exp_nodes))
-        print("start location = ", str(self.start_pos))
-        print("goal location = ", str(self.goal_pos))
+        # don't cover start and goal locations with sol_path or exp_nodes
         self.maze_sol_path.pop(0)
+        if tuple(self.start_pos) in self.maze_exp_nodes:
+            self.maze_exp_nodes.remove(tuple(self.start_pos))
             
         # setup initial maze frame: no solution paths
         for i in range(self.maze_num_rows):
@@ -144,7 +145,7 @@ class Visualize(object):
                 else:
                     self.ax.add_patch(self.squares[(i, j)])
 
-        self.squares[(-1, -1)] = plt.text(1, 1, "")
+        self.squares[(-1, -1)] = plt.text(0, 0, "")
         self.patches.append(self.squares[(-1, -1)])
         
         # animate figure
@@ -152,35 +153,22 @@ class Visualize(object):
                                        self.UpdateAnimation,
                                        frames=len(self.maze_sol_path),
                                        repeat=False,
-                                       interval=200,  # should be adjustable in the end
-                                       blit=True)
+                                       interval=200)  # should be adjustable in the end
+                                       # blit=True)
 
         self.ShowFigure()
 
     # updates animation every frame to show new maze figure
     def UpdateAnimation(self, frameNumber):
 
-        # don't cover start and goal locations with sol_path or exp_nodes
-        # self.maze_sol_path.pop(0)
-
-        # if tuple(self.start_pos) in self.maze_exp_nodes:
-        #     print("still inside before")
-
-        # if tuple(self.start_pos) in self.maze_exp_nodes:
-        #     index = self.maze_exp_nodes.index(tuple(self.start_pos))
-        #     del self.maze_exp_nodes[index]
-
-        # if tuple(self.start_pos) in self.maze_exp_nodes:
-        #     print("still inside after")
-
         # keep popping nodes from exp_nodes list until it pops one that is in the sol_path
         while True:
             try:
                 exp_nodes_entry = self.maze_exp_nodes.pop(0)
+                self.pop_count += 1
             except IndexError:
                 self.animation.event_source.stop()
 
-            self.pop_count += 1
             self.map_percentage = (self.pop_count / self.map_size) * 100
             if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos):
                 self.squares[exp_nodes_entry].set_facecolor("red")
@@ -190,7 +178,18 @@ class Visualize(object):
                 self.squares[(row, col)].set_facecolor("green")
                 break;
 
-        self.squares[(-1, -1)].set_text("map expanded: {}%".format(round(self.map_percentage, 0)))
+        # update legend
+        sg_squares = mpatches.Patch(color=self.maze_colors["sg"], label='start and goal')
+        exp_nodes_squares = mpatches.Patch(color=self.maze_colors["exp_nodes"], label='expanded nodes')
+        sol_path_squares = mpatches.Patch(color=self.maze_colors["sol_path"], label='solution path')
+        exp_nodes_p = mpatches.Patch(color=self.maze_colors["exp_nodes"], label='{}% map expanded'.format(round(self.map_percentage, 0)))
+        plt.legend(handles=[sg_squares, exp_nodes_squares, sol_path_squares, exp_nodes_p], loc='center left', bbox_to_anchor=(1.01, 0.5))
+        self.iteration = self.iteration + 1
+
+        # update bottom title
+        self.t1.set_text("iteration #{}".format(self.iteration))
+        self.t2.set_text("nodes expanded: {}".format(self.pop_count))
+
         return self.patches
 
 
