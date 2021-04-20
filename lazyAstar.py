@@ -10,6 +10,35 @@ expanded_nodes = []
 
 
 """
+push_node from mapf project
+"""
+def push_node(curr_list, node):
+    heapq.heappush(curr_list, (node['g_val'] + node['h_val'], node['h_val'], node['loc'], node))
+
+"""
+pop_node from mapf project
+"""
+def pop_node(curr_list):
+    _, _, _, curr = heapq.heappop(curr_list)
+    return curr
+
+"""
+get_path from mapf project
+"""
+def get_path(node):
+    path = []
+    curr = node
+    while curr is not None:
+        path.append(curr['loc'])
+        curr = curr['parent']
+    path.reverse()
+    print("LENGTH:", len(path))
+    return path
+
+
+
+
+"""
 Helper class for A* search implementing the queue
 Put method takes a function to compare elements
 """
@@ -45,8 +74,10 @@ Manhattan heruristics returns sum of absolute vlaue of difference in coordinates
 def manhattan_heuristics(current_pos, goal_pos):
     return abs((current_pos[0] - goal_pos[0])) + abs((current_pos[1] - goal_pos[1]))
 
-def compare_f():
-    pass
+def compare_lazyA(iteratingEl, x):
+    if (iteratingEl['g_val'] > x['g_val']):
+        return True
+    return False
 
 
 """
@@ -57,30 +88,87 @@ Heuristic function takes current position and goal position
 Returns paths and expanded nodes
 """
 def lazy_a_star(agent,h):
-    frontier = PQueue()
-    frontier.put(agent.start, 0)
-    came_from = np.array()
-    cost_so_far = np.array()
-    came_from[agent.start] = None
-    cost_so_far[agent.start] = 0
+    """
+    h                - chosen heuristic
+    agent.map        - maze to solve
+    agent.start      - agent starting goal
+    agent.goal       - agent end goal
+    agent.current    - agents current position
+    """
+
+    expanded_nodes.clear()
+
+    # convert from numpy to regulat list, heappush has problems with numpy
+    start_pos = (agent.start[0], agent.start[1])
+    goal_pos = (agent.goal[0], agent.goal[1])
+    current_pos = start_pos
+
+    # initialization
+    print("\nCoordinate Configuration: (Y, X)")
+    print("Start State:", start_pos)
+    print("Goal State:", goal_pos, "\n")
+
+    open_list = PQueue()
+    closed_list = dict()
+    root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}
     
-    while not frontier.empty():
-        current = frontier.get()
+    open_list.put(root, compare_lazyA)
+    #push_node(open_list, root)
+    closed_list[(root['loc'])] = root
+
+    nodes_expanded = 0
+    max_size_of_open = len(open_list.elements)
+    while len(open_list.elements) > 0:
+        nodes_expanded += 1 # time complexity
+        if len(open_list.elements) > max_size_of_open: # space complexity
+            max_size_of_open = len(open_list.elements)
+
+        node = open_list.get()   #pop_node(open_list)
+            
         
-        if current == agent.goal:
-            break
+        expanded_nodes.append(node['loc'])
+        current_pos = node['loc']
+        agent.current[0] = current_pos[0]
+        agent.current[1] = current_pos[1]
+
+        # path to goal state has been found
+        if (node['loc'][0] == agent.goal[0] and node['loc'][1] == agent.goal[1]):
+            print("SOLUTION FOUND!")
+            print("NODES EXPANDED:", nodes_expanded)
+            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
+            return get_path(node), expanded_nodes
+
+        # take movement option indices in agentBase.nextStep()...
+        # map out viable indices to locations in map
+        move_options = agent.nextStep()
+        move_list =[]
         
-        next_steps = agent.nextStep()
-        
-        for next in next_steps:
-            new_cost = cost_so_far[current] + h(next, agent.goal)
-            if next not in cost_so_far or new_cost < cost_so_far[next]:
-                cost_so_far[next] = new_cost
-                priority = new_cost + h(next, agent.goal)
-                frontier.put(next, priority)
-                came_from[next] = current
-    
-    return came_from, cost_so_far
+        for i in range(len(move_options)):
+            if move_options[i] == 1:
+                move_list.append((node['loc'][0], node['loc'][1]+1))
+            if move_options[i] == 2:
+                move_list.append((node['loc'][0]+1, node['loc'][1]))
+            if move_options[i] == 3:
+                move_list.append((node['loc'][0], node['loc'][1]-1))
+            if move_options[i] == 4: 
+                move_list.append((node['loc'][0]-1, node['loc'][1]))
+                
+        # end of for in loop
+
+        # for valid locations, create movement child
+        for move in move_list:
+            child = {'loc': move,
+                    'g_val': node['g_val'] + 1,
+                    'h_val': h(move, goal_pos),
+                    'parent': node}
+            if not (child['loc']) in closed_list: # pruning
+                closed_list[(child['loc'])] = child
+                #push_node(open_list, child)
+                open_list.put(child, compare_lazyA)
+        # end of for in loop
+
+    # end of while
+    return None  # Failed to find solutions
 
 
 
@@ -96,11 +184,27 @@ def main():
     # sol_path, exp_nodes = breadth_first_search(agent)
     #sol_path, exp_nodes = depth_first_search(agent)
     sol_path, exp_nodes = lazy_a_star(agent,manhattan_heuristics)
-    animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    #animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
     # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
 
-    animation.StartAnimation()
+    #animation.StartAnimation()
 
 
 if __name__ == '__main__':
     main()
+
+
+
+
+""" A*
+
+Coordinate Configuration: (Y, X)
+Start State: (2, 1)
+Goal State: (18, 26) 
+
+SOLUTION FOUND:
+NODES EXPANDED: 138
+MAX SIZE OF OPEN_LIST: 8
+LENGTH: 56
+
+"""
