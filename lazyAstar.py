@@ -184,10 +184,10 @@ def main():
     # sol_path, exp_nodes = breadth_first_search(agent)
     #sol_path, exp_nodes = depth_first_search(agent)
     sol_path, exp_nodes = lazy_a_star(agent,manhattan_heuristics)
-    #animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    animation = visualize.Visualize(maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
     # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
 
-    #animation.StartAnimation()
+    animation.StartAnimation()
 
 
 if __name__ == '__main__':
