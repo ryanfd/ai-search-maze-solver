@@ -46,11 +46,11 @@ class MCTSearch:
     def __init__(self, agent):
         self.map = agent.map
         self.currentNode =  Node(agent) #{'loc': agent.start_pos, 'g_val': 0, 'parent': None}
-        self.agent = agent
+        self.visited = np.ndarray(agent.start)
       
     
-    def move(self, direction):
-        self.agent.current = direction
+    def move(self, direction,agent):
+        agent.current = direction
         """if direction == 1:
             self.agent.current[1] += 1
             
@@ -66,12 +66,32 @@ class MCTSearch:
         return self.agent.current"""
     
     
-    def randPlay(self, movePosition):
+    def moveOld(self, direction,agent):
+        if direction == 1:
+            agent.current[1] += 1
+            
+        if direction == 2:
+            #print(type(agent.current))
+            agent.current[0] += 1
+            
+        if direction == 3:
+            agent.current[1] -= 1
+            
+        if direction == 4:
+            agent.current[0] -= 1
+            
+        return agent.current
+    
+    
+    
+    
+    def randPlayDFS(self, movePosition, agent):
+        
         # convert from numpy to regulat list, heappush has problems with numpy
-        start_pos = (self.agent.start[0], self.agent.start[1])
-        goal_pos = (self.agent.goal[0], self.agent.goal[1])
+        start_pos = (agent.start[0], agent.start[1])
+        goal_pos = (agent.goal[0], agent.goal[1])
         current_pos = start_pos
-        agentScout = copy.deepcopy(self.agent)
+        agentScout = copy.deepcopy(agent)
         # initialization
       
 
@@ -98,9 +118,6 @@ class MCTSearch:
 
             # path to goal state has been found
             if current_pos == goal_pos:
-                #print("SOLUTION FOUND:")
-                #print("NODES EXPANDED:", nodes_expanded)
-                #print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
                 #print("FOUND"  + str(10000 - penalty))
                 return 10000 - penalty
 
@@ -122,8 +139,8 @@ class MCTSearch:
                     # end of for in loop
 
             # for valid locations, create movement child
-            for move in move_list:
-                child = {'loc': move,
+            for moveOption in move_list:
+                child = {'loc': moveOption,
                          'parent': node}
                 if not (child['loc']) in closed_list: # pruning
                     closed_list[(child['loc'])] = child
@@ -134,11 +151,43 @@ class MCTSearch:
         return -10 - penalty
     
     
+    def randPlayBlind(self, movePosition, agent):
+        agentScout = copy.deepcopy(agent)
         
-    def treeSearch(self):
-        move_options = self.agent.nextStep()
+        counter = 0
+        while counter < 100:
+            counter += 1
+            direction = agentScout.randomMove()
+            
+            
+            """limit = 0
+            while True #TODO CHANGE!!!!!!!!!!
+                direction = agentScout.randomMove()
+                limit += 1
+                if limit > 5:
+                    break
+           """
+                
+            #print(str(agentScout.current[0]) + " " + str(agentScout.current[1]))
+            
+            #print(type(agent.current))
+            
+            if (type(agent.current) is tuple):
+                #print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                agent.current = np.asarray(agent.current)
+            #agentScout.current = agentScout.move(direction)
+            self.moveOld(direction, agent)
+        
+            if agentScout.map[agentScout.current[0]][agentScout.current[1]] != '1':
+                #print("FOUND"  + str(10000 - penalty))
+                return 10000
+        
+        return -10
+        
+    def treeSearch(self, agent):
+        move_options = agent.nextStep()
         validMoves = []
-        node = Node(self.agent)
+        node = Node(agent)
         for i in range(len(move_options)):
             if move_options[i] == 1:
                 validMoves.append((node.location[0], node.location[1]+1))
@@ -152,16 +201,16 @@ class MCTSearch:
         
         winRates = []
         for i in range(len(validMoves)):
-            node = Node(self.agent)
+            node = Node(agent)
             winRates.append(node)
             
         for i in range(len(validMoves)):
             for k in range(50):
-                res = self.randPlay(validMoves[i])
+                res = self.randPlayBlind(validMoves[i], agent)
                 winRates[i].addWinRate(res)
         
         if len(validMoves) == 0:
-            return self.agent.current
+            return agent.current
         
         
         bestChoice = validMoves[0]
@@ -178,24 +227,26 @@ class MCTSearch:
 
 
 
-    def random_forest(self):
+    def random_forest(self,agent):
         counter = 0
+        path = []
         print("START")
-        while self.agent.map[self.agent.current[0]][self.agent.current[1]] != '1' and counter < 100:
+        while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 1000:
             counter += 1
-            direction = self.treeSearch()
+            direction = self.treeSearch(agent)
             #print("DIRECTION " + str(direction))
-            print(str(self.agent.current[0]) + " " + str(self.agent.current[1]))
+            print(str(agent.current[0]) + " " + str(agent.current[1]))
             #print("MOVE " + str(self.agent.move(direction)))
-            self.move(direction)
+            self.move(direction,agent)
+            path.append(direction)
         
         print("DONE")
-        return 1
+        return path, expanded_nodes
 
 
 
 def main():
-    
+    #TODO - add time measurements!!!!!!!
     maze_instance = ("maze_instances/maze1.txt") 
     algorithm = "a_star algorithm"
 
@@ -211,7 +262,11 @@ def main():
 
     #mtc.treeSearch()
     
-    mtc.random_forest()
+    path, expanded_nodes = mtc.random_forest(agent)
+    print(path)
+    
+    
+    
     #sol_path, exp_nodes = random_forest(agent)
     #animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
 
