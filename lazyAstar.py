@@ -68,6 +68,7 @@ class PQueue:
 
 
 
+
 """
 Manhattan heruristics returns sum of absolute vlaue of difference in coordinates of corresponding axis
 """
@@ -87,7 +88,7 @@ Heuristic function takes current position and goal position
 
 Returns paths and expanded nodes
 """
-def lazy_a_star(agent,h):
+def lazy_a_star(agent):
     """
     h                - chosen heuristic
     agent.map        - maze to solve
@@ -95,7 +96,8 @@ def lazy_a_star(agent,h):
     agent.goal       - agent end goal
     agent.current    - agents current position
     """
-
+    h1 = manhattan_heuristics
+    h2 = search.straight_line_heursitic
     expanded_nodes.clear()
 
     # convert from numpy to regulat list, heappush has problems with numpy
@@ -110,7 +112,7 @@ def lazy_a_star(agent,h):
 
     open_list = PQueue()
     closed_list = dict()
-    root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}
+    root = {'loc': start_pos, 'g_val': 0,'h2_applied': False, 'h_val': h1(start_pos, goal_pos), 'parent': None}
     
     open_list.put(root, compare_lazyA)
     #push_node(open_list, root)
@@ -137,35 +139,45 @@ def lazy_a_star(agent,h):
             print("NODES EXPANDED:", nodes_expanded)
             print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
             return get_path(node), expanded_nodes
-
-        # take movement option indices in agentBase.nextStep()...
-        # map out viable indices to locations in map
-        move_options = agent.nextStep()
-        move_list =[]
         
-        for i in range(len(move_options)):
-            if move_options[i] == 1:
-                move_list.append((node['loc'][0], node['loc'][1]+1))
-            if move_options[i] == 2:
-                move_list.append((node['loc'][0]+1, node['loc'][1]))
-            if move_options[i] == 3:
-                move_list.append((node['loc'][0], node['loc'][1]-1))
-            if move_options[i] == 4: 
-                move_list.append((node['loc'][0]-1, node['loc'][1]))
-                
-        # end of for in loop
-
-        # for valid locations, create movement child
-        for move in move_list:
-            child = {'loc': move,
-                    'g_val': node['g_val'] + 1,
-                    'h_val': h(move, goal_pos),
-                    'parent': node}
-            if not (child['loc']) in closed_list: # pruning
-                closed_list[(child['loc'])] = child
-                #push_node(open_list, child)
-                open_list.put(child, compare_lazyA)
-        # end of for in loop
+        if node['h2_applied'] == False:
+            if h1(node['loc'], goal_pos) < h2(node['loc'], goal_pos):
+                node['h_val'] = h2(node['loc'], goal_pos)
+            node['h2_applied'] = True
+            open_list.put(node, compare_lazyA)
+        else:
+        
+            # take movement option indices in agentBase.nextStep()...
+            # map out viable indices to locations in map
+            move_options = agent.nextStep()
+            move_list =[]
+            
+            for i in range(len(move_options)):
+                if move_options[i] == 1:
+                    move_list.append((node['loc'][0], node['loc'][1]+1))
+                if move_options[i] == 2:
+                    move_list.append((node['loc'][0]+1, node['loc'][1]))
+                if move_options[i] == 3:
+                    move_list.append((node['loc'][0], node['loc'][1]-1))
+                if move_options[i] == 4: 
+                    move_list.append((node['loc'][0]-1, node['loc'][1]))
+                    
+            # end of for in loop
+    
+            # for valid locations, create movement child
+            for move in move_list:
+                child = {'loc': move,
+                        'h2_applied': False,
+                        'g_val': node['g_val'] + 1,
+                        'h_val': h1(move, goal_pos),
+                        'parent': node}
+                if not (child['loc']) in closed_list: # pruning
+                    
+                    
+                    closed_list[(child['loc'])] = child
+                    #push_node(open_list, child)
+                    open_list.put(child, compare_lazyA)
+            # end of for in loop
 
     # end of while
     return None  # Failed to find solutions
@@ -183,11 +195,15 @@ def main():
 
     # sol_path, exp_nodes = breadth_first_search(agent)
     #sol_path, exp_nodes = depth_first_search(agent)
-    sol_path, exp_nodes = lazy_a_star(agent,manhattan_heuristics)
-    animation = visualize.Visualize(maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    
+    
+    sol_path, exp_nodes = lazy_a_star(agent)
+    #animation = visualize.Visualize(maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    
+    
     # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
 
-    animation.StartAnimation()
+    #animation.StartAnimation()
 
 
 if __name__ == '__main__':

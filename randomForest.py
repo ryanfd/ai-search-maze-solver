@@ -201,9 +201,6 @@ class MCTSearch:
         while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10:
             counter += 1
             direction = self.treeSearch(agent)
-            #print("DIRECTION " + str(direction))
-            #print(str(agent.current[0]) + " _ " + str(agent.current[1]))
-            #print("MOVE " + str(self.agent.move(direction)))
             path.append(agent.current)
             self.move(direction,agent)
             
