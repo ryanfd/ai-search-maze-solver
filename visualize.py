@@ -117,7 +117,7 @@ class Visualize(object):
         plt.legend(handles=[sg_squares, sol_path_squares, exp_nodes_squares, exp_nodes_p], loc='center left', bbox_to_anchor=(1.01, 0.5))
 
         # setup title
-        title_str = "Depth-First Search"
+        title_str = "Lazy AStar Search \n Manhattan-distance Heuristic"
         plt.title(label=title_str, fontsize=18, loc='center')
         self.t1 = self.fig.text(0.25, 0.05, "iteration #0", ha='center')
         self.t2 = self.fig.text(0.75, 0.05, "nodes expanded: {}".format(self.pop_count), ha='center')
