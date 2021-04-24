@@ -45,6 +45,7 @@ class Visualize(object):
         self.pop_count = 0
         self.map_percentage = 0
         self.iteration = 0
+        self.ida_iteration = 0
 
         self.GenerateMaze(instance_path)
 
@@ -117,7 +118,7 @@ class Visualize(object):
         plt.legend(handles=[sg_squares, sol_path_squares, exp_nodes_squares, exp_nodes_p], loc='center left', bbox_to_anchor=(1.01, 0.5))
 
         # setup title
-        title_str = "Lazy AStar Search \n Manhattan-distance Heuristic"
+        title_str = "IDA-Star Search \n Manhattan-distance Heuristic"
         plt.title(label=title_str, fontsize=18, loc='center')
         self.t1 = self.fig.text(0.25, 0.05, "iteration #0", ha='center')
         self.t2 = self.fig.text(0.75, 0.05, "nodes expanded: {}".format(self.pop_count), ha='center')
@@ -153,7 +154,7 @@ class Visualize(object):
                                        self.UpdateAnimation,
                                        frames=len(self.maze_sol_path),
                                        repeat=False,
-                                       interval=200)  # should be adjustable in the end
+                                       interval=1000)  # should be adjustable in the end
                                        # blit=True)
 
         self.ShowFigure()
@@ -161,22 +162,36 @@ class Visualize(object):
     # updates animation every frame to show new maze figure
     def UpdateAnimation(self, frameNumber):
 
+        # every solution path square thats in exp_nodes[i] green
+        self.ida_iteration += 1 
+        for i in range(len(self.maze_exp_nodes[self.ida_iteration])): 
+            exp_nodes_entry = self.maze_exp_nodes[self.ida_iteration][i]
+            self.squares[exp_nodes_entry].set_facecolor("red")
+        for i in range(len(self.maze_sol_path)):
+            if self.maze_sol_path[i] in self.maze_exp_nodes[self.ida_iteration]:
+                print("true")
+                self.squares[self.maze_sol_path[i]].set_facecolor("green")
+
+
+
+
         # keep popping nodes from exp_nodes list until it pops one that is in the sol_path
-        while True:
-            try:
-                exp_nodes_entry = self.maze_exp_nodes.pop(0)
-                self.pop_count += 1
-            except IndexError:
-                self.animation.event_source.stop()
+        # while True:
+        #     try:
+        #         exp_nodes_entry = self.maze_exp_nodes[self.ida_iteration].pop(0)
+        #         self.pop_count += 1
+        #     except IndexError:
+        #         self.animation.event_source.stop()
 
-            self.map_percentage = (self.pop_count / self.map_size) * 100
-            if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos):
-                self.squares[exp_nodes_entry].set_facecolor("red")
+        #     self.map_percentage = (self.pop_count / self.map_size) * 100
+        #     if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos):
+        #         self.squares[exp_nodes_entry].set_facecolor("red")
 
-            if exp_nodes_entry in self.maze_sol_path:
-                row, col = self.maze_sol_path.pop(0)
-                self.squares[(row, col)].set_facecolor("green")
-                break;
+
+        #     if exp_nodes_entry in self.maze_sol_path:
+        #         row, col = self.maze_sol_path.pop(0)
+        #         self.squares[(row, col)].set_facecolor("green")
+        #         break;
 
         # update legend
         sg_squares = mpatches.Patch(color=self.maze_colors["sg"], label='start and goal')

@@ -7,7 +7,6 @@ import math
 
 # required for animation. Put this wherever you want
 expanded_nodes = []
-solution_paths = []
 
 """
 push_node from mapf project
@@ -296,7 +295,6 @@ def ida_star(self, h):
     functioncall = 0
 
     expanded_nodes.clear()
-    solution_paths.clear()
 
     """
     h               - chosen heuristic
@@ -333,8 +331,6 @@ def ida_star(self, h):
 
         # returns int if solution not found, path if found
         result = ida_star_helper(self, open_list, goal_pos, result, closed_list, h, nodes_expanded_list, max_size_of_open_list)
-        if not isinstance(result, np.int64):
-            solution_paths.append(get_path(result))
 
         if isinstance(result, np.int64):
             total_time_complexity += nodes_expanded_list.pop() # add together expanded nodes through multiple calls of search helper
@@ -346,12 +342,10 @@ def ida_star(self, h):
             print("functioncall = ", str(functioncall))
             for i in range(len(expanded_nodes)):
                 print("len expanded_nodes = ", str(len(expanded_nodes[i])))
-            for i in range(len(solution_paths)):
-                print("len solution_paths = ", str(len(solution_paths[i])))
             print("SOLUTION FOUND:")
             print("NODES EXPANDED:", total_time_complexity)
             print("MAX SIZE OF OPEN_LIST:", total_space_complexity)
-            return get_path(result), expanded_nodes, solution_paths
+            return get_path(result), expanded_nodes
 
 
 """
@@ -426,7 +420,7 @@ def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expa
 def main():
 
     # modify these lines to change algorithm or change maze instance
-    maze_instance = ("maze_instances/start_far_from_goal.txt") 
+    maze_instance = ("maze_instances/start_close_to_goal.txt") 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
     start_loc = my_map.start.copy()
@@ -434,7 +428,7 @@ def main():
     agent = agentBase.Agent(my_map)
 
     # run search
-    sol_path, exp_nodes, sol_paths = ida_star(agent, manhattan_distance_heuristic)
+    sol_path, exp_nodes = ida_star(agent, manhattan_distance_heuristic)
 
     # run animation for search
     animation = visualize.Visualize(maze_instance, start_loc, goal_loc, sol_path, exp_nodes)
