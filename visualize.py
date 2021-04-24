@@ -45,6 +45,7 @@ class Visualize(object):
         self.pop_count = 0
         self.map_percentage = 0
         self.iteration = 0
+        self.maze_sol_path_copy = []
 
         self.GenerateMaze(instance_path)
 
@@ -117,7 +118,7 @@ class Visualize(object):
         plt.legend(handles=[sg_squares, sol_path_squares, exp_nodes_squares, exp_nodes_p], loc='center left', bbox_to_anchor=(1.01, 0.5))
 
         # setup title
-        title_str = "Depth-First Search"
+        title_str = "Lazy AStar Search \n Manhattan-distance and straight-line Heuristic"
         plt.title(label=title_str, fontsize=18, loc='center')
         self.t1 = self.fig.text(0.25, 0.05, "iteration #0", ha='center')
         self.t2 = self.fig.text(0.75, 0.05, "nodes expanded: {}".format(self.pop_count), ha='center')
@@ -126,7 +127,11 @@ class Visualize(object):
         self.maze_sol_path.pop(0)
         if tuple(self.start_pos) in self.maze_exp_nodes:
             self.maze_exp_nodes.remove(tuple(self.start_pos))
+
             
+        # remove duplicates from exp_nodes
+        self.maze_exp_nodes = list(dict.fromkeys(self.maze_exp_nodes))
+
         # setup initial maze frame: no solution paths
         for i in range(self.maze_num_rows):
             for j in range(self.maze_num_cols):
@@ -165,16 +170,19 @@ class Visualize(object):
         while True:
             try:
                 exp_nodes_entry = self.maze_exp_nodes.pop(0)
+                print ("exp_nodes_entry = ", str(exp_nodes_entry))
                 self.pop_count += 1
             except IndexError:
                 self.animation.event_source.stop()
 
             self.map_percentage = (self.pop_count / self.map_size) * 100
-            if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos):
+            if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos) and exp_nodes_entry not in self.maze_sol_path_copy:
                 self.squares[exp_nodes_entry].set_facecolor("red")
 
             if exp_nodes_entry in self.maze_sol_path:
                 row, col = self.maze_sol_path.pop(0)
+                self.maze_sol_path_copy.append((row, col))
+                print("sol_path_entry = (", str(row), ", ", str(col), ")")
                 self.squares[(row, col)].set_facecolor("green")
                 break;
 

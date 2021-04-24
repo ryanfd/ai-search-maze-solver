@@ -186,24 +186,17 @@ def lazy_a_star(agent):
 
 def main():
 
-    maze_instance = ("maze_instances/maze1.txt") 
-    algorithm = "lazy a_star algorithm"
+    maze_instance = ("maze_instances/start_close_to_goal.txt") 
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
+    start_loc = my_map.start.copy()
+    goal_loc = my_map.goal.copy()
     agent = agentBase.Agent(my_map)
 
-    # sol_path, exp_nodes = breadth_first_search(agent)
-    #sol_path, exp_nodes = depth_first_search(agent)
-    
-    
     sol_path, exp_nodes = lazy_a_star(agent)
-    #animation = visualize.Visualize(maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
-    
-    
-    # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
-
-    #animation.StartAnimation()
+    animation = visualize.Visualize(maze_instance, start_loc, goal_loc, sol_path, exp_nodes)
+    animation.StartAnimation()
 
 
 if __name__ == '__main__':
