@@ -45,25 +45,12 @@ def get_path(node):
 class MCTSearch:
     def __init__(self, agent):
         self.map = agent.map
-        self.currentNode =  Node(agent) #{'loc': agent.start_pos, 'g_val': 0, 'parent': None}
+        self.currentNode =  Node(agent) 
         self.visited = np.ndarray(agent.start)
       
     
     def move(self, direction,agent):
         agent.current = direction
-        """if direction == 1:
-            self.agent.current[1] += 1
-            
-        if direction == 2:
-            self.agent.current[0] += 1
-            
-        if direction == 3:
-            self.agent.current[1] -= 1
-            
-        if direction == 4:
-            self.agent.current[0] -= 1
-            
-        return self.agent.current"""
     
     
     def moveOld(self, direction,agent):
@@ -71,7 +58,7 @@ class MCTSearch:
             agent.current[1] += 1
             
         if direction == 2:
-            #print(type(agent.current))
+            
             agent.current[0] += 1
             
         if direction == 3:
@@ -83,16 +70,14 @@ class MCTSearch:
         return agent.current
     
     
-    
-    
     def randPlayDFS(self, movePosition, agent):
         
-        # convert from numpy to regulat list, heappush has problems with numpy
+        
         start_pos = (agent.start[0], agent.start[1])
         goal_pos = (agent.goal[0], agent.goal[1])
         current_pos = start_pos
         agentScout = copy.deepcopy(agent)
-        # initialization
+        
       
 
         open_stack = list()
@@ -118,7 +103,6 @@ class MCTSearch:
 
             # path to goal state has been found
             if current_pos == goal_pos:
-                #print("FOUND"  + str(10000 - penalty))
                 return 10000 - penalty
 
             # take movement option indices in agentBase.nextStep()...
@@ -147,39 +131,24 @@ class MCTSearch:
                     open_stack.append(child)
                     # end of for in loop
                     # end of while loop
-        #print("NOT FOUND" + str(-10 - penalty))
         return -10 - penalty
     
     
     def randPlayBlind(self, movePosition, agent):
         agentScout = copy.deepcopy(agent)
+        closed_list = []
         
         counter = 0
         while counter < 100:
             counter += 1
             direction = agentScout.randomMove()
             
-            
-            """limit = 0
-            while True #TODO CHANGE!!!!!!!!!!
-                direction = agentScout.randomMove()
-                limit += 1
-                if limit > 5:
-                    break
-           """
-                
-            #print(str(agentScout.current[0]) + " " + str(agentScout.current[1]))
-            
-            #print(type(agent.current))
-            
             if (type(agent.current) is tuple):
-                #print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 agent.current = np.asarray(agent.current)
-            #agentScout.current = agentScout.move(direction)
+                
             self.moveOld(direction, agent)
         
             if agentScout.map[agentScout.current[0]][agentScout.current[1]] != '1':
-                #print("FOUND"  + str(10000 - penalty))
                 return 10000
         
         return -10
@@ -220,8 +189,6 @@ class MCTSearch:
                 maxVal = i
                 bestChoice = validMoves[i]
                 
-        #self.game.makeAMove(bestChoice, self.player)
-        print(bestChoice)
         return bestChoice
 
 
@@ -231,14 +198,15 @@ class MCTSearch:
         counter = 0
         path = []
         print("START")
-        while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 1000:
+        while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10:
             counter += 1
             direction = self.treeSearch(agent)
             #print("DIRECTION " + str(direction))
-            print(str(agent.current[0]) + " " + str(agent.current[1]))
+            #print(str(agent.current[0]) + " _ " + str(agent.current[1]))
             #print("MOVE " + str(self.agent.move(direction)))
+            path.append(agent.current)
             self.move(direction,agent)
-            path.append(direction)
+            
         
         print("DONE")
         return path, expanded_nodes
