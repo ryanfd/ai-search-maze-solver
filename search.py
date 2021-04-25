@@ -411,7 +411,7 @@ def main():
 
     # modify these lines to change algorithm or change maze instance
     search_algorithm = a_star_search
-    maze_instance = ("maze_instances/maze4.txt") 
+    maze_instance = ("maze_instances/start_far_from_goal.txt") 
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
@@ -425,8 +425,8 @@ def main():
     print("--- %s seconds ---" % (time.time() - start_time))
 
     # run animation for search
-    # animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
-    # animation.StartAnimation()
+    animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    animation.StartAnimation()
 
 
 if __name__ == '__main__':

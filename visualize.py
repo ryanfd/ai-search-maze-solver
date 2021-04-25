@@ -182,7 +182,6 @@ class Visualize(object):
 
             self.pop_count += 1
             self.map_percentage = (self.pop_count / self.map_size) * 100
-            print("PERCENTAGE", self.map_percentage)
             if exp_nodes_entry != tuple(self.start_pos) and exp_nodes_entry != tuple(self.goal_pos):
                 self.squares[exp_nodes_entry].set_facecolor("red")
 
