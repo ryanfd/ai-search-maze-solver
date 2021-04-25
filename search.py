@@ -3,6 +3,7 @@ import visualize
 import numpy as np
 import heapq
 import math
+import time
 
 # required for animation. Put this wherever you want
 expanded_nodes = []
@@ -326,7 +327,7 @@ def ida_star(self, h):
         # returns int if solution not found, path if found
         result = ida_star_helper(self, open_list, goal_pos, result, closed_list, h, nodes_expanded_list, max_size_of_open_list)
 
-        if isinstance(result, np.int64):
+        if isinstance(result, np.int64) or isinstance(result, float):
             total_time_complexity += nodes_expanded_list.pop() # add together expanded nodes through multiple calls of search helper
             if total_space_complexity < max_size_of_open_list[0]:
                 total_space_complexity = max_size_of_open_list.pop()
@@ -410,18 +411,22 @@ def main():
 
     # modify these lines to change algorithm or change maze instance
     search_algorithm = a_star_search
-    maze_instance = ("maze_instances/straight_line.txt") 
+    maze_instance = ("maze_instances/maze4.txt") 
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
     agent = agentBase.Agent(my_map)
 
     # run search
+    start_time = time.time()
+
     sol_path, exp_nodes = search_algorithm(agent, straight_line_heursitic)
+    # print(ida_star(agent, manhattan_distance_heuristic))
+    print("--- %s seconds ---" % (time.time() - start_time))
 
     # run animation for search
-    animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
-    animation.StartAnimation()
+    # animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    # animation.StartAnimation()
 
 
 if __name__ == '__main__':

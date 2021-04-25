@@ -6,6 +6,7 @@ class Map:
         self.start = np.array([0,0])
         self.goal = np.array([0,0])
         self.fileName = fileName
+        self.map_size = 0
     
     """
     Takes an instance of the map and returns it as a 2D array of corresponding 'free' and 'blocked' cells
@@ -19,9 +20,15 @@ class Map:
             for coll in range(len(self.map[row])):
                 # Checking each cell one by one
                 if self.map[row][coll] == '0':
+                    self.map_size += 1
                     self.start = np.array([row,coll])
                 elif self.map[row][coll] == '1':
                     self.goal = np.array([row,coll])
+                    self.map_size += 1
+                elif self.map[row][coll] == '.':
+                    self.map_size += 1
+        
+        print("SIZE:", self.map_size)
 
 class Agent:
     def __init__(self, my_map):
