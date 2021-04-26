@@ -428,9 +428,12 @@ def main():
     agent = agentBase.Agent(my_map)
 
     # run search
-    sol_path, exp_nodes = ida_star(agent, manhattan_distance_heuristic)
+    sol_path, exp_nodes = a_star_search(agent, manhattan_distance_heuristic)
 
     # run animation for search
+
+    # NOTE: comment out these two lines if running IDA* algorithm
+    # animations are not supposed to work with IDA*
     animation = visualize.Visualize(maze_instance, start_loc, goal_loc, sol_path, exp_nodes)
     animation.StartAnimation()
 
