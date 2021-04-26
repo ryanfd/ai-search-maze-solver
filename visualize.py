@@ -127,7 +127,11 @@ class Visualize(object):
         self.maze_sol_path.pop(0)
         if tuple(self.start_pos) in self.maze_exp_nodes:
             self.maze_exp_nodes.remove(tuple(self.start_pos))
+
             
+        # remove duplicates from exp_nodes
+        self.maze_exp_nodes = list(dict.fromkeys(self.maze_exp_nodes))
+
         # setup initial maze frame: no solution paths
         for i in range(self.maze_num_rows):
             for j in range(self.maze_num_cols):

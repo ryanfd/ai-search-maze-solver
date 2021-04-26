@@ -3,22 +3,29 @@ import visualize
 import numpy as np
 import heapq
 import math
+import random
+import copy
 
 # required for animation. Put this wherever you want
 expanded_nodes = []
 
-"""
-push_node from mapf project
-"""
-def push_node(curr_list, node):
-    heapq.heappush(curr_list, (node['g_val'] + node['h_val'], node['h_val'], node['loc'], node))
-
-"""
-pop_node from mapf project
-"""
-def pop_node(curr_list):
-    _, _, _, curr = heapq.heappop(curr_list)
-    return curr
+class Node:
+    def __init__(self,agent):
+        self.location = agent.current
+        self.numOfWins = 0
+        self.parent = None
+    
+    def setValue(self, val):
+        self.valueOfVisits = val
+        
+    def setNum(self, num):
+        self.numOfVisits = num
+        
+    def addWinRate(self, incr):
+        self.numOfWins += incr
+        
+    def getWinRate(self):
+        return self.numOfWins
 
 """
 get_path from mapf project
@@ -34,265 +41,201 @@ def get_path(node):
     return path
 
 
-"""
-Straight Line Heuristic
 
-@author: Ryan Donnelly
-"""
-def straight_line_heursitic(current_pos, goal_pos):
-    """
-    c^2 = a^2 + b^2
-    c   = sqrt((x1-x2)^2 + (y1-y2)^2)
-    """
-    return math.sqrt((goal_pos[0] - current_pos[0])**2 + (goal_pos[1] - current_pos[1])**2)
-
-"""
-Dept-First Search
-Pseudocode: https://en.wikipedia.org/wiki/Depth-first_search#Pseudocode
-
-@author: Ryan Donnelly
-"""
-def depth_first_search(self):
-    expanded_nodes.clear()
-
-    # convert from numpy to regulat list, heappush has problems with numpy
-    start_pos = (self.start[0], self.start[1])
-    goal_pos = (self.goal[0], self.goal[1])
-    current_pos = start_pos
-
-    # initialization
-    print("\nCoordinate Configuration: (Y, X)")
-    print("Start State:", start_pos)
-    print("Goal State:", goal_pos, "\n")
-
-    open_stack = []
-    closed_list = dict()
-    root = {'loc': start_pos, 'parent': None}
-    open_stack.append(root)
-    closed_list[(root['loc'])] = root
-
-    nodes_expanded = 0
-    max_size_of_open = len(open_stack)
-    while len(open_stack) > 0:
-        nodes_expanded += 1 # time complexity
-        if len(open_stack) > max_size_of_open: # space complexity
-            max_size_of_open = len(open_stack)
-
-        node = open_stack.pop() # LIFO
-        expanded_nodes.append(node['loc'])
-        current_pos = node['loc']
-        self.current[0] = current_pos[0]
-        self.current[1] = current_pos[1]
-
-        # path to goal state has been found
-        if current_pos == goal_pos:
-            print("SOLUTION FOUND:")
-            print("NODES EXPANDED:", nodes_expanded)
-            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
-            return get_path(node), expanded_nodes
-
-        # take movement option indices in agentBase.nextStep()...
-        # map out viable indices to locations in map
-        move_options = self.nextStep()
-        move_list = []
-        for i in range(len(move_options)):
-            if move_options[i] == 1:
-                move_list.append((node['loc'][0], node['loc'][1]+1))
-            if move_options[i] == 2:
-                move_list.append((node['loc'][0]+1, node['loc'][1]))
-            if move_options[i] == 3:
-                move_list.append((node['loc'][0], node['loc'][1]-1))
-            if move_options[i] == 4: 
-                move_list.append((node['loc'][0]-1, node['loc'][1]))
-        # end of for in loop
-
-        # for valid locations, create movement child
-        for move in move_list:
-            child = {'loc': move,
-                    'parent': node}
-            if not (child['loc']) in closed_list: # pruning
-                closed_list[(child['loc'])] = child
-                open_stack.append(child)
-        # end of for in loop
-    # end of while loop
-
-    return None
-
-"""
-Breadth-First Search
-Pseudocode: https://en.wikipedia.org/wiki/Breadth-first_search#Pseudocode
-
-@author: Ryan Donnelly
-"""
-def breadth_first_search(self):
-    expanded_nodes.clear()
-
-    # convert from numpy to regulat list, heappush has problems with numpy
-    start_pos = (self.start[0], self.start[1])
-    goal_pos = (self.goal[0], self.goal[1])
-    current_pos = start_pos
-
-    # initialization
-    print("\nCoordinate Configuration: (Y, X)")
-    print("Start State:", start_pos)
-    print("Goal State:", goal_pos, "\n")
-
-    open_list = []
-    closed_list = dict()
-    root = {'loc': start_pos, 'parent': None}
-    open_list.append(root)
-    closed_list[(root['loc'])] = root
-
-    nodes_expanded = 0
-    max_size_of_open = len(open_list)
-    while len(open_list) > 0:
-        nodes_expanded += 1 # time complexity
-        if len(open_list) > max_size_of_open: # space complexity
-            max_size_of_open = len(open_list)
-
-        node = open_list.pop(0) # FIFO
-        expanded_nodes.append(node['loc'])
-        current_pos = node['loc']
-        self.current[0] = current_pos[0]
-        self.current[1] = current_pos[1]
-
-        # path to goal state has been found
-        if current_pos == goal_pos:
-            print("SOLUTION FOUND:")
-            print("NODES EXPANDED:", nodes_expanded)
-            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
-            return get_path(node), expanded_nodes
-
-        # take movement option indices in agentBase.nextStep()...
-        # map out viable indices to locations in map
-        move_options = self.nextStep()
-        move_list = []
-        for i in range(len(move_options)):
-            if move_options[i] == 1:
-                move_list.append((node['loc'][0], node['loc'][1]+1))
-            if move_options[i] == 2:
-                move_list.append((node['loc'][0]+1, node['loc'][1]))
-            if move_options[i] == 3:
-                move_list.append((node['loc'][0], node['loc'][1]-1))
-            if move_options[i] == 4: 
-                move_list.append((node['loc'][0]-1, node['loc'][1]))
-        # end of for in loop
-
-        # for valid locations, create movement child
-        for move in move_list:
-            child = {'loc': move,
-                    'parent': node}
-            if not (child['loc']) in closed_list: # pruning
-                closed_list[(child['loc'])] = child
-                open_list.append(child)
-        # end of for in loop
-    # end of while loop
-
+class MCTSearch:
+    def __init__(self, agent):
+        self.map = agent.map
+        self.currentNode =  Node(agent) 
+        self.visited = np.ndarray(agent.start)
+      
+    
+    def move(self, direction,agent):
+        agent.current = direction
+    
+    
+    def moveOld(self, direction,agent):
+        if direction == 1:
+            agent.current[1] += 1
+            
+        if direction == 2:
+            
+            agent.current[0] += 1
+            
+        if direction == 3:
+            agent.current[1] -= 1
+            
+        if direction == 4:
+            agent.current[0] -= 1
+            
+        return agent.current
+    
+    
+    def randPlayDFS(self, movePosition, agent):
         
-
-
-"""
-A* Search
-Pseudocode: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
-
-@author: Ryan Donnelly
-"""
-
-def a_star_search(self, h):
-    """
-    h               - chosen heuristic
-    self.map        - maze to solve
-    self.start      - agent starting goal
-    self.goal       - agent end goal
-    self.current    - agents current position
-    """
-
-    expanded_nodes.clear()
-
-    # convert from numpy to regulat list, heappush has problems with numpy
-    start_pos = (self.start[0], self.start[1])
-    goal_pos = (self.goal[0], self.goal[1])
-    current_pos = start_pos
-
-    # initialization
-    print("\nCoordinate Configuration: (Y, X)")
-    print("Start State:", start_pos)
-    print("Goal State:", goal_pos, "\n")
-
-    open_list = []
-    closed_list = dict()
-    root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}
-    push_node(open_list, root)
-    closed_list[(root['loc'])] = root
-
-    nodes_expanded = 0
-    max_size_of_open = len(open_list)
-    while len(open_list) > 0:
-        nodes_expanded += 1 # time complexity
-        if len(open_list) > max_size_of_open: # space complexity
-            max_size_of_open = len(open_list)
-
-        node = pop_node(open_list)
-        expanded_nodes.append(node['loc'])
-        current_pos = node['loc']
-        self.current[0] = current_pos[0]
-        self.current[1] = current_pos[1]
-
-        # path to goal state has been found
-        if current_pos == goal_pos:
-            print("SOLUTION FOUND:")
-            print("NODES EXPANDED:", nodes_expanded)
-            print("MAX SIZE OF OPEN_LIST:", max_size_of_open)
-            return get_path(node), expanded_nodes
-
-        # take movement option indices in agentBase.nextStep()...
-        # map out viable indices to locations in map
-        move_options = self.nextStep()
-        move_list =[]
         
-        for i in range(len(move_options)):
-            if move_options[i] == 1:
-                move_list.append((node['loc'][0], node['loc'][1]+1))
-            if move_options[i] == 2:
-                move_list.append((node['loc'][0]+1, node['loc'][1]))
-            if move_options[i] == 3:
-                move_list.append((node['loc'][0], node['loc'][1]-1))
-            if move_options[i] == 4: 
-                move_list.append((node['loc'][0]-1, node['loc'][1]))
+        start_pos = (agent.start[0], agent.start[1])
+        goal_pos = (agent.goal[0], agent.goal[1])
+        current_pos = start_pos
+        agentScout = copy.deepcopy(agent)
+        
+      
+
+        open_stack = list()
+        closed_list = dict()
+        root = {'loc': start_pos, 'parent': None}
+        open_stack.append(root)
+        closed_list[(root['loc'])] = root
+
+        nodes_expanded = 0
+        max_size_of_open = len(open_stack)
+        penalty = 0
+        while len(open_stack) > 0:
+            penalty += 1
+            nodes_expanded += 1 # time complexity
+            if len(open_stack) > max_size_of_open: # space complexity
+                max_size_of_open = len(open_stack)
+            random.shuffle(open_stack)
+            node = open_stack.pop() # LIFO
+ 
+            current_pos = node['loc']
+            agentScout.current[0] = current_pos[0]
+            agentScout.current[1] = current_pos[1]
+
+            # path to goal state has been found
+            if current_pos == goal_pos:
+                return 10000 - penalty
+
+            # take movement option indices in agentBase.nextStep()...
+            # map out viable indices to locations in map
+            move_options = agentScout.nextStep()
+            random.shuffle(move_options)
+            move_list = []
+            for i in range(len(move_options)):
+            #if len(move_options) > 0:
+                if move_options[i] == 1:
+                    move_list.append((node['loc'][0], node['loc'][1]+1))
+                if move_options[i] == 2:
+                    move_list.append((node['loc'][0]+1, node['loc'][1]))
+                if move_options[i] == 3:
+                    move_list.append((node['loc'][0], node['loc'][1]-1))
+                if move_options[i] == 4: 
+                    move_list.append((node['loc'][0]-1, node['loc'][1]))
+                    # end of for in loop
+
+            # for valid locations, create movement child
+            for moveOption in move_list:
+                child = {'loc': moveOption,
+                         'parent': node}
+                if not (child['loc']) in closed_list: # pruning
+                    closed_list[(child['loc'])] = child
+                    open_stack.append(child)
+                    # end of for in loop
+                    # end of while loop
+        return -10 - penalty
+    
+    
+    def randPlayBlind(self, movePosition, agent):
+        agentScout = copy.deepcopy(agent)
+        closed_list = []
+        
+        counter = 0
+        while counter < 100:
+            counter += 1
+            direction = agentScout.randomMove()
+            
+            if (type(agent.current) is tuple):
+                agent.current = np.asarray(agent.current)
                 
+            self.moveOld(direction, agent)
+        
+            if agentScout.map[agentScout.current[0]][agentScout.current[1]] != '1':
+                return 10000
+        
+        return -10
+        
+    def treeSearch(self, agent):
+        move_options = agent.nextStep()
+        validMoves = []
+        node = Node(agent)
+        for i in range(len(move_options)):
+            if move_options[i] == 1:
+                validMoves.append((node.location[0], node.location[1]+1))
+            if move_options[i] == 2:
+                validMoves.append((node.location[0]+1, node.location[1]))
+            if move_options[i] == 3:
+                validMoves.append((node.location[0], node.location[1]-1))
+            if move_options[i] == 4: 
+                validMoves.append((node.location[0]-1, node.location[1]))
         # end of for in loop
+        
+        winRates = []
+        for i in range(len(validMoves)):
+            node = Node(agent)
+            winRates.append(node)
+            
+        for i in range(len(validMoves)):
+            for k in range(50):
+                res = self.randPlayBlind(validMoves[i], agent)
+                winRates[i].addWinRate(res)
+        
+        if len(validMoves) == 0:
+            return agent.current
+        
+        
+        bestChoice = validMoves[0]
+        maxVal = 0
+        for i in range(len(validMoves)):
+            if winRates[i].getWinRate() > winRates[maxVal].getWinRate():
+                maxVal = i
+                bestChoice = validMoves[i]
+                
+        return bestChoice
 
-        # for valid locations, create movement child
-        for move in move_list:
-            child = {'loc': move,
-                    'g_val': node['g_val'] + 1,
-                    'h_val': h(move, goal_pos),
-                    'parent': node}
-            if not (child['loc']) in closed_list: # pruning
-                closed_list[(child['loc'])] = child
-                push_node(open_list, child)
-        # end of for in loop
 
-    # end of while
-    return None  # Failed to find solutions
+
+
+    def random_forest(self,agent):
+        counter = 0
+        path = []
+        print("START")
+        while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10:
+            counter += 1
+            direction = self.treeSearch(agent)
+            path.append(agent.current)
+            self.move(direction,agent)
+            
+        
+        print("DONE")
+        return path, expanded_nodes
 
 
 
 def main():
-
+    #TODO - add time measurements!!!!!!!
     maze_instance = ("maze_instances/maze1.txt") 
     algorithm = "a_star algorithm"
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
     agent = agentBase.Agent(my_map)
+    
+    print("\nCoordinate Configuration: (Y, X)")
+    print("Start State:", agent.start)
+    print("Goal State:", agent.goal, "\n")
+    
+    mtc = MCTSearch(agent)
 
-    # sol_path, exp_nodes = breadth_first_search(agent)
-    sol_path, exp_nodes = depth_first_search(agent)
-    animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
-    # sol_path, exp_nodes = a_star_search(agent, straight_line_heursitic)
+    #mtc.treeSearch()
+    
+    path, expanded_nodes = mtc.random_forest(agent)
+    print(path)
+    
+    
+    
+    #sol_path, exp_nodes = random_forest(agent)
+    #animation = visualize.Visualize(algorithm, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
 
-    animation.StartAnimation()
+    #animation.StartAnimation()
 
 
 if __name__ == '__main__':

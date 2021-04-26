@@ -100,9 +100,9 @@ def main():
     while agent.map[agent.current[0]][agent.current[1]] != '1' and counter < 10000:
         counter += 1
         direction = agent.randomMove()
-        print(str(agent.current[0]) + " " + str(agent.current[1]))
+        
         agent.current = agent.move(direction)
-
+        print(str(agent.current[0]) + " " + str(agent.current[1]))
 
 
 if __name__ == '__main__':
