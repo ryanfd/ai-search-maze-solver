@@ -415,17 +415,19 @@ def main():
 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
+    start_loc = my_map.start.copy()
+    goal_loc = my_map.goal.copy()
     agent = agentBase.Agent(my_map)
 
     # run search
     start_time = time.time()
 
-    sol_path, exp_nodes = search_algorithm(agent, straight_line_heursitic)
+    sol_path, exp_nodes = a_star_search(agent, manhattan_distance_heuristic)
     # print(ida_star(agent, manhattan_distance_heuristic))
     print("--- %s seconds ---" % (time.time() - start_time))
 
     # run animation for search
-    animation = visualize.Visualize(search_algorithm.__name__, maze_instance, my_map.start, my_map.goal, sol_path, exp_nodes)
+    animation = visualize.Visualize(maze_instance, start_loc, goal_loc, sol_path, exp_nodes)
     animation.StartAnimation()
 
 
