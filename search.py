@@ -1,3 +1,4 @@
+import visualize
 import agentBase
 import visualize
 import numpy as np
@@ -291,6 +292,10 @@ Pseudocode: https://en.wikipedia.org/wiki/Iterative_deepening_A*#Pseudocode
 @author: Ryan Donnelly
 """
 def ida_star(self, h):
+    functioncall = 0
+
+    expanded_nodes.clear()
+
     """
     h               - chosen heuristic
     self.map        - maze to solve
@@ -317,6 +322,7 @@ def ida_star(self, h):
     total_space_complexity = 0
 
     while True:
+        functioncall += 1
         open_list = []
         closed_list = dict()
         root = {'loc': start_pos, 'g_val': 0, 'h_val': h(start_pos, goal_pos), 'parent': None}
@@ -333,10 +339,13 @@ def ida_star(self, h):
             if result == -1:
                 return None
         else:
+            print("functioncall = ", str(functioncall))
+            for i in range(len(expanded_nodes)):
+                print("len expanded_nodes = ", str(len(expanded_nodes[i])))
             print("SOLUTION FOUND:")
             print("NODES EXPANDED:", total_time_complexity)
             print("MAX SIZE OF OPEN_LIST:", total_space_complexity)
-            return get_path(result)
+            return get_path(result), expanded_nodes
 
 
 """
@@ -349,6 +358,7 @@ def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expa
     nodes_expanded = 0
     max_size_of_open = 0
     curr_dist = -1
+    expanded_nodes.append([])
 
     while len(open_list) > 0:
         nodes_expanded += 1 # time complexity
@@ -356,6 +366,7 @@ def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expa
             max_size_of_open = len(open_list)
         
         node = pop_node(open_list)
+        expanded_nodes[-1].append(node['loc'])
         current_pos = node['loc']
         self.current[0] = current_pos[0]
         self.current[1] = current_pos[1]
@@ -409,9 +420,7 @@ def ida_star_helper(self, open_list, goal_pos, bound, closed_list, h, nodes_expa
 def main():
 
     # modify these lines to change algorithm or change maze instance
-    search_algorithm = depth_first_search
-    maze_instance = ("maze_instances/start_far_from_goal.txt") 
-
+    maze_instance = ("maze_instances/start_close_to_goal.txt") 
     my_map = agentBase.Map(maze_instance)
     my_map.getMap()
     start_loc = my_map.start.copy()
@@ -419,7 +428,7 @@ def main():
     agent = agentBase.Agent(my_map)
 
     # run search
-    sol_path, exp_nodes = search_algorithm(agent)
+    sol_path, exp_nodes = ida_star(agent, manhattan_distance_heuristic)
 
     # run animation for search
     animation = visualize.Visualize(maze_instance, start_loc, goal_loc, sol_path, exp_nodes)
