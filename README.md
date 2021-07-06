@@ -1,5 +1,7 @@
 # search-maze-solver
 
+Project Report and Insights: https://docs.google.com/document/d/1SemDPjtKB7vVL3DjSr8uJrTXULx18xf-hcsATXZNWio/edit?usp=sharing
+
 Setup:
 1. Install Python3
 
